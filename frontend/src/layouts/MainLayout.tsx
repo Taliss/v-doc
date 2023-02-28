@@ -63,11 +63,12 @@ export default function MainLayout({ children }: { children: ReactNode }) {
               <IconButton>
                 <QuestionMarkIcon />
               </IconButton>
+              // TODO: render only one of the two possible actions
               <IconButton>
                 <LoginIcon />
               </IconButton>
               <IconButton>
-                <LogoutIcon></LogoutIcon>
+                <LogoutIcon />
               </IconButton>
             </Stack>
           </Toolbar>
