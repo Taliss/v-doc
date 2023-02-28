@@ -1,0 +1,9 @@
+build
+.next
+public
+manifests
+*.css
+**/*.d.ts
+package-lock.json
+src/graphql/**/*.gen.tsx
+src/graphql/types.ts
