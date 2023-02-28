@@ -9,6 +9,8 @@ services:
       - ./prisma:/usr/src/prisma
     ports:
       - '3000:3000'
+    depends_on:
+      - pg-db
   pg-db:
     image: postgres:15.2-alpine
     container_name: pg-db
@@ -22,10 +24,16 @@ services:
       POSTGRES_DB: ${DB_NAME?}
     volumes:
       - pg-db-data:/var/lib/postgresql/data
+  prisma-studio:
+    container_name: prisma-studio
+    image: timothyjmiller/prisma-studio
+    restart: unless-stopped
+    ports:
+      - ${PRISMA_STUDIO_PORT}:5555
   pg-admin:
     container_name: pg-admin4
     image: dpage/pgadmin4
-    restart: always
+    restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
