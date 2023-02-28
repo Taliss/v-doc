@@ -1,11 +1,36 @@
 services:
-  frontend:
-    container_name: frontend-app
+  app:
+    container_name: app
     build:
-      context: ./frontend
       dockerfile: ./Dockerfile
     volumes:
-      - ./frontend/src:/usr/src/app/src
-      - ./frontend/public:/usr/src/app/public
+      - ./src:/usr/src/app/src
+      - ./public:/usr/src/app/public
+      - ./prisma:/usr/src/prisma
     ports:
       - '3000:3000'
+  pg-db:
+    image: postgres:15.2-alpine
+    container_name: pg-db
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      PGPASSWORD: ${DB_PASS?}
+      POSTGRES_USER: ${DB_USER?}
+      POSTGRES_PASSWORD: ${DB_PASS?}
+      POSTGRES_DB: ${DB_NAME?}
+    volumes:
+      - pg-db-data:/var/lib/postgresql/data
+  pg-admin:
+    container_name: pg-admin4
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - '5050:80'
+volumes:
+  pg-db-data:
+    driver: local
