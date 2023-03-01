@@ -1,24 +1,49 @@
-import LoginIcon from '@mui/icons-material/Login'
 import LogoutIcon from '@mui/icons-material/Logout'
 
-import QuestionMarkIcon from '@mui/icons-material/QuestionMark'
-import { AppBar, IconButton, Stack, Toolbar } from '@mui/material'
+import { AppBar, Button, IconButton, Stack, Toolbar, Tooltip, Typography } from '@mui/material'
+import { signOut, useSession } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import routes from 'routes'
+
+const UserActionsMenu = () => {
+  const { status, data } = useSession()
+  const router = useRouter()
+
+  if (status !== 'authenticated') {
+    return (
+      <>
+        <Button color="inherit" onClick={() => router.push(routes.login)}>
+          LOGIN
+        </Button>
+        <Button color="inherit" onClick={() => router.push(routes.register)}>
+          REGISTER
+        </Button>
+      </>
+    )
+  }
+
+  console.log(JSON.stringify(data), ' !?')
+  return (
+    <>
+      <Typography variant="h6" component="div" pt={0.5}>
+        Hello {data?.user?.email}
+      </Typography>
+      <Tooltip title="logout">
+        <IconButton onClick={() => signOut({ callbackUrl: '/' })}>
+          <LogoutIcon />
+        </IconButton>
+      </Tooltip>
+    </>
+  )
+}
 
 export default function Appbar() {
   return (
     <AppBar position="static">
       <Toolbar>
         <Stack direction="row" spacing={2} justifyContent="flex-end" flex={1}>
-          <IconButton>
-            <QuestionMarkIcon />
-          </IconButton>
-          // TODO: render only one of the two possible actions
-          <IconButton>
-            <LoginIcon />
-          </IconButton>
-          <IconButton>
-            <LogoutIcon />
-          </IconButton>
+          {/* TODO: render only one of the two possible actions */}
+          <UserActionsMenu />
         </Stack>
       </Toolbar>
     </AppBar>
