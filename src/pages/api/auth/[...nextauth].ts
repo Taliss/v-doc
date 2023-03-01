@@ -20,11 +20,11 @@ export const authOptions = {
           return null
         }
         try {
-          const response = await axios.post('http://localhost:3000/api/auth/login', {
+          const { data, status } = await axios.post('http://localhost:3000/api/auth/login', {
             email: credentials?.email,
             password: credentials?.password,
           })
-          return response.status === 200 && response?.data?.user ? response.data.user : null
+          return status === 200 && data?.user ? data.user : null
         } catch (error) {
           error instanceof Error ? console.error(error.message) : console.error(error)
           return null
