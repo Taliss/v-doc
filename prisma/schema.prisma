@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
 }
 
 datasource db {
@@ -11,11 +12,26 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @default(now()) @map(name: "updated_at")
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  email      String    @unique
+  createdAt  DateTime? @default(now()) @map(name: "created_at")
+  updatedAt  DateTime? @default(now()) @map(name: "updated_at")
+  ownedFiles File[]    @relation("OwnedFiles")
 
   @@map(name: "users")
+}
+
+model File {
+  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fileName   String         @map(name: "file_name")
+  content    String         @default("")
+  owner      User           @relation("OwnedFiles", fields: [authorId], references: [id])
+  authorId   String         @db.Uuid
+  visibility FileVisibility @default(PRIVATE)
+}
+
+enum FileVisibility {
+  PUBLIC
+  PRIVATE
 }
