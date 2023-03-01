@@ -15,7 +15,7 @@ export default function ControlTextField({ name, label, ...props }: ControlTextF
         <TextField
           fullWidth
           size="small"
-          color="secondary"
+          color="primary"
           variant="outlined"
           label={label}
           value={value}
