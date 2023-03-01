@@ -17,7 +17,8 @@
     "baseUrl": "./src",
     "paths": {
       "@/layouts/*": ["layouts/*"],
-      "@/components/*": ["components/*"]
+      "@/components/*": ["components/*"],
+      "@/prisma-client": ["lib/prisma"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

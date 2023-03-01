@@ -7,8 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate:dev": "prisma migrate dev -- --",
-    "db:push": "prisma db push -- --"
+    "migrate:dev": "npx prisma migrate dev -- --",
+    "db:push": "npx prisma db push -- --",
+    "generate": "npx prisma generate",
+    "studio": "npx prisma studio"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
