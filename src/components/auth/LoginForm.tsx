@@ -2,6 +2,8 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@mui/material'
 import Box from '@mui/material/Box'
 import Stack from '@mui/system/Stack'
+import axios from 'axios'
+import { useRouter } from 'next/router'
 import { useFormContext, UseFormProps } from 'react-hook-form'
 import * as yup from 'yup'
 
@@ -30,13 +32,20 @@ export const formOptions: UseFormProps<LoginFormData> = {
 }
 
 export default function LoginForm({ formRef }: LoginFormProps) {
-  const { handleSubmit } = useFormContext<LoginFormData>()
+  const router = useRouter()
+  const { handleSubmit, setError } = useFormContext<LoginFormData>()
 
-  const onSubmit = handleSubmit(async (values, event) => {
+  const onSubmit = handleSubmit(async ({ email, password }, event) => {
     event?.preventDefault()
 
-    // TODO: connect form
-    console.log('Login form submitted: ', values)
+    try {
+      await axios.post('/api/auth/login', { email, password })
+      router.push('/personal')
+    } catch (e: any) {
+      const eMessage = e?.response?.data?.message || 'Ooops something went whrong'
+      setError('email', { type: 'loginInput', message: eMessage })
+      setError('password', { type: 'loginInput', message: eMessage })
+    }
   })
 
   return (
