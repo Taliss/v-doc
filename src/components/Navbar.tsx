@@ -1,6 +1,7 @@
 import { Container, Stack } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import routes from 'routes'
 
 const StyledLink = styled(Link)(({ theme }) => ({
@@ -42,6 +43,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
 }))
 
 export default function Navbar() {
+  const router = useRouter()
   return (
     <Container
       component="nav"
@@ -58,8 +60,18 @@ export default function Navbar() {
         pt={{ xs: 2, sm: 0 }}
         spacing={{ xs: 1, sm: 4 }}
       >
-        <StyledLink href={routes.public}>Public</StyledLink>
-        <StyledLink href={routes.personal}>Personal</StyledLink>
+        <StyledLink
+          href={routes.public}
+          className={router.pathname === `${routes.public}` ? 'active' : ''}
+        >
+          Public
+        </StyledLink>
+        <StyledLink
+          href={routes.personal}
+          className={router.pathname === `${routes.personal}` ? 'active' : ''}
+        >
+          Personal
+        </StyledLink>
       </Stack>
     </Container>
   )
