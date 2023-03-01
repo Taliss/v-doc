@@ -15,14 +15,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const user = await prisma.user.findUnique({ where: { email } })
     if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' })
+      return res.status(400).send(null)
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password)
     if (!passwordMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' })
+      return res.status(400).send(null)
     } else {
-      return res.status(200).json({ message: http.STATUS_CODES[200] })
+      return res.status(200).json({ user: { email: user.email, id: user.id } })
     }
   } catch (error) {
     console.error(error)

@@ -2,7 +2,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { Button } from '@mui/material'
 import Box from '@mui/material/Box'
 import Stack from '@mui/system/Stack'
-import axios from 'axios'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { useFormContext, UseFormProps } from 'react-hook-form'
 import * as yup from 'yup'
@@ -35,16 +35,32 @@ export default function LoginForm({ formRef }: LoginFormProps) {
   const router = useRouter()
   const { handleSubmit, setError } = useFormContext<LoginFormData>()
 
-  const onSubmit = handleSubmit(async ({ email, password }, event) => {
+  const onSubmit = handleSubmit(async (values, event) => {
     event?.preventDefault()
-
     try {
-      await axios.post('/api/auth/login', { email, password })
-      router.push('/personal')
-    } catch (e: any) {
-      const eMessage = e?.response?.data?.message || 'Ooops something went whrong'
-      setError('email', { type: 'loginInput', message: eMessage })
-      setError('password', { type: 'loginInput', message: eMessage })
+      const response = await signIn<'credentials'>('credentials', {
+        email: values.email?.trim(),
+        password: values.password,
+        redirect: false,
+      })
+      // Next-Auth returns an error-like object, more below:
+      // https://stackoverflow.com/questions/70165993/how-to-handle-login-failed-error-in-nextauth-js
+
+      if (response?.ok) {
+        router.push(`${router.query.callbackUrl ?? '/personal'}`)
+      }
+
+      if (response?.error) {
+        // whrong credentials are provided next-auth sets status code to 401 in their error-like object.
+        if (response.status === 401) {
+          setError('email', { type: 'loginInput', message: 'Invalid credentials' })
+          setError('password', { type: 'loginInput', message: 'Invalid credentials' })
+        } else {
+          throw new Error(response.error)
+        }
+      }
+    } catch (e) {
+      console.error(e)
     }
   })
 
