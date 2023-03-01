@@ -12,12 +12,10 @@ datasource db {
 }
 
 model User {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name       String
-  email      String    @unique
-  createdAt  DateTime? @default(now()) @map(name: "created_at")
-  updatedAt  DateTime? @default(now()) @map(name: "updated_at")
-  ownedFiles File[]    @relation("OwnedFiles")
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String @unique
+  password   String @unique
+  ownedFiles File[] @relation("OwnedFiles")
 
   @@map(name: "users")
 }

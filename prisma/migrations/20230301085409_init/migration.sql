@@ -1,9 +1,14 @@
 -- CreateEnum
 CREATE TYPE "FileVisibility" AS ENUM ('PUBLIC', 'PRIVATE');
 
--- AlterTable
-ALTER TABLE "users" ALTER COLUMN "created_at" DROP NOT NULL,
-ALTER COLUMN "updated_at" DROP NOT NULL;
+-- CreateTable
+CREATE TABLE "users" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "File" (
@@ -15,6 +20,12 @@ CREATE TABLE "File" (
 
     CONSTRAINT "File_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_password_key" ON "users"("password");
 
 -- AddForeignKey
 ALTER TABLE "File" ADD CONSTRAINT "File_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

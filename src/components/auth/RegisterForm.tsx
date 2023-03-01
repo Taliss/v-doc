@@ -2,6 +2,8 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
+import axios from 'axios'
+import { useRouter } from 'next/router'
 import { useFormContext, UseFormProps } from 'react-hook-form'
 import * as yup from 'yup'
 
@@ -30,15 +32,21 @@ export const formOptions: UseFormProps<RegisterFormData> = {
 }
 
 export default function RegisterForm({ formRef }: RegisterFormProps) {
-  // const router = useRouter()
+  const router = useRouter()
 
-  const { handleSubmit } = useFormContext<RegisterFormData>()
+  const { handleSubmit, setError } = useFormContext<RegisterFormData>()
 
-  const onSubmit = handleSubmit(async (values, event) => {
+  const onSubmit = handleSubmit(async ({ password, email }, event) => {
     event?.preventDefault()
 
-    // TODO: come here later
-    console.log('form submitted: ', values)
+    //TODO no time for state-management and error handling...
+    try {
+      await axios.post('/api/auth/register', { email, password })
+      router.push('/personal')
+    } catch (e: any) {
+      const eMessage = e?.response?.data?.message || 'Ooops something went whrong'
+      setError('email', { type: 'registerInput', message: eMessage })
+    }
   })
   return (
     <Box

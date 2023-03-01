@@ -89,7 +89,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             spacing={{ xs: 1, sm: 4 }}
           >
             <StyledLink href="/">Public</StyledLink>
-            <StyledLink href="/private">Private</StyledLink>
+            <StyledLink href="/personal">Personal</StyledLink>
             <StyledLink href="/shared">Shared</StyledLink>
             <StyledLink href="/archived">Archived</StyledLink>
           </Stack>
