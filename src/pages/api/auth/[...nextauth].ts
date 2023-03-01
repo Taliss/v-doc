@@ -1,12 +1,20 @@
 import axios from 'axios'
-import NextAuth from 'next-auth'
+import NextAuth, { ISODateString, NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   pages: {
     signIn: '/login',
     signOut: '/',
-    error: '/login',
+    error: '/',
+  },
+  session: {
+    strategy: 'jwt',
+    maxAge: 60 * 60 * 1, //1 hours
+    updateAge: 60 * 10, // 10 minutes
+  },
+  jwt: {
+    maxAge: 60 * 60 * 1, // 1 hour
   },
   providers: [
     CredentialsProvider({
@@ -24,7 +32,12 @@ export const authOptions = {
             email: credentials?.email,
             password: credentials?.password,
           })
-          return status === 200 && data?.user ? data.user : null
+
+          if (status === 200) {
+            return data?.user
+          } else {
+            return null
+          }
         } catch (error) {
           error instanceof Error ? console.error(error.message) : console.error(error)
           return null
@@ -32,6 +45,24 @@ export const authOptions = {
       },
     }),
   ],
+  callbacks: {
+    async session({ session, token }) {
+      // TODO: Why is next-auth populating user object with default undefined values...
+      // Also the typings are terrible...
+      // @ts-ignore
+      session.user = { id: token.id, email: session.user.email }
+      return session as {
+        user: { id: string; email: string }
+        expires: ISODateString
+      }
+    },
+    async jwt({ account, token, user }) {
+      if (account?.provider === 'credentials' && user) {
+        token.id = user.id
+      }
+      return token
+    },
+  },
 }
 
 export default NextAuth(authOptions)

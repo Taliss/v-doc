@@ -8,7 +8,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   //For getting session on server side the docs recommend using getServerSession as per
   //here: https://next-auth.js.org/configuration/nextjs#getserversession
   const session = await getServerSession(ctx.req, ctx.res, authOptions)
-
   if (!session) {
     return {
       redirect: {
