@@ -1,6 +1,7 @@
 import { Container, Stack } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import Link from 'next/link'
+import routes from 'routes'
 
 const StyledLink = styled(Link)(({ theme }) => ({
   display: 'inline-block',
@@ -57,10 +58,8 @@ export default function Navbar() {
         pt={{ xs: 2, sm: 0 }}
         spacing={{ xs: 1, sm: 4 }}
       >
-        <StyledLink href="/">Public</StyledLink>
-        <StyledLink href="/personal">Personal</StyledLink>
-        <StyledLink href="/shared">Shared</StyledLink>
-        <StyledLink href="/archived">Archived</StyledLink>
+        <StyledLink href={routes.public}>Public</StyledLink>
+        <StyledLink href={routes.personal}>Personal</StyledLink>
       </Stack>
     </Container>
   )

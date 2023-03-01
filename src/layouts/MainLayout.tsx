@@ -3,6 +3,7 @@ import { ReactNode } from 'react'
 
 import Appbar from '@/components/Appbar'
 import Navbar from '@/components/Navbar'
+import Container from '@mui/material/Container'
 import Box from '@mui/system/Box'
 
 export default function MainLayout({ children }: { children: ReactNode }) {
@@ -14,7 +15,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Appbar />
         <Navbar />
-        {children}
+        <Container maxWidth="lg" disableGutters>
+          {children}
+        </Container>
       </Box>
     </>
   )

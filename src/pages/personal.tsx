@@ -1,11 +1,7 @@
-import { useSession } from 'next-auth/react'
+import { getLayout } from '@/layouts/MainLayout'
 
 export default function Personal() {
-  const { data: session } = useSession()
-  return (
-    <>
-      <h2>Helloo</h2>
-      <p>{JSON.stringify(session)}</p>
-    </>
-  )
+  return <h1>Helloo there from personal!</h1>
 }
+
+Personal.getLayout = getLayout
