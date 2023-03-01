@@ -1,16 +1,16 @@
 services:
-  app:
-    container_name: app
-    build:
-      dockerfile: ./Dockerfile
-    volumes:
-      - ./src:/usr/src/app/src
-      - ./public:/usr/src/app/public
-      - ./prisma:/usr/src/prisma
-    ports:
-      - '3000:3000'
-    depends_on:
-      - pg-db
+  # app:
+  #   container_name: app
+  #   build:
+  #     dockerfile: ./Dockerfile
+  #   volumes:
+  #     - ./src:/usr/src/app/src
+  #     - ./public:/usr/src/app/public
+  #     - ./prisma:/usr/src/app/prisma
+  #   ports:
+  #     - '3000:3000'
+  #   depends_on:
+  #     - pg-db
   pg-db:
     image: postgres:15.2-alpine
     container_name: pg-db
