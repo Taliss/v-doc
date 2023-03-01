@@ -1,5 +1,6 @@
 import { Container, Stack } from '@mui/material'
 import { styled } from '@mui/material/styles'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import routes from 'routes'
@@ -43,6 +44,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
 }))
 
 export default function Navbar() {
+  const { status } = useSession()
   const router = useRouter()
   return (
     <Container
@@ -66,12 +68,14 @@ export default function Navbar() {
         >
           Public
         </StyledLink>
-        <StyledLink
-          href={routes.personal}
-          className={router.pathname === `${routes.personal}` ? 'active' : ''}
-        >
-          Personal
-        </StyledLink>
+        {status === 'authenticated' && (
+          <StyledLink
+            href={routes.personal}
+            className={router.pathname === `${routes.personal}` ? 'active' : ''}
+          >
+            Personal
+          </StyledLink>
+        )}
       </Stack>
     </Container>
   )

@@ -22,7 +22,6 @@ const UserActionsMenu = () => {
     )
   }
 
-  console.log(JSON.stringify(data), ' !?')
   return (
     <>
       <Typography variant="h6" component="div" pt={0.5}>
