@@ -2,6 +2,14 @@ import axios from 'axios'
 import NextAuth, { ISODateString, NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
+export type ServerSession = {
+  user: {
+    name: string
+    id: string
+  }
+  expires: ISODateString
+}
+
 export const authOptions: NextAuthOptions = {
   pages: {
     signIn: '/login',
@@ -51,10 +59,7 @@ export const authOptions: NextAuthOptions = {
       // Also the typings are terrible...
       // @ts-ignore
       session.user = { id: token.id, email: session.user.email }
-      return session as {
-        user: { id: string; email: string }
-        expires: ISODateString
-      }
+      return session as ServerSession
     },
     async jwt({ account, token, user }) {
       if (account?.provider === 'credentials' && user) {

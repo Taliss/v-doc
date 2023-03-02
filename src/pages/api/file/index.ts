@@ -1,10 +1,10 @@
 import prisma from '@/prisma-client'
 import { FileVisibility, Prisma } from '@prisma/client'
 import http from 'http'
-import { getServerSession, ISODateString } from 'next-auth'
+import { getServerSession } from 'next-auth'
 import { NextApiRequest, NextApiResponse } from 'next/types'
 import { object, string, ValidationError } from 'yup'
-import { authOptions } from '../auth/[...nextauth]'
+import { authOptions, ServerSession } from '../auth/[...nextauth]'
 
 const createFileSchema = object({
   name: string().required().trim().min(1),
@@ -32,17 +32,9 @@ const createFile = async ({
   return file
 }
 
-type ServerSession = {
-  user: {
-    name: string
-    id: string
-  }
-  expires: ISODateString
-} | null
-
 // TODO isn't there better way with middlewares... I know nextjs has middleware functionalities and need to reserch it, no time...
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session: ServerSession = await getServerSession(req, res, authOptions)
+  const session: ServerSession | null = await getServerSession(req, res, authOptions)
   if (!session) {
     return res.status(401).end()
   }
@@ -69,6 +61,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ message: error.message })
       }
       return res.status(500).json({ message: http.STATUS_CODES[500] })
+    }
+  }
+
+  if (req.method === 'DELETE') {
+    // TODO: Not sure if Prisma supports RLS so we stick with extra query
+    if (!req.body.fileId) {
+      return res.status(400).end()
+    }
+
+    // this try-catch is bad, error-handling middleware is required, no time to research it
+    try {
+      const fileMatchQuery = { where: { id: req.body.fileId } }
+      const file = await prisma.file.findUnique(fileMatchQuery)
+
+      if (!file) return res.status(404).end()
+      if (file.authorId !== session.user.id) {
+        return res.status(400).end()
+      }
+
+      // actually delete the file, no time for archived
+      await prisma.file.delete(fileMatchQuery)
+
+      return res.status(404).end()
+    } catch (error) {
+      // not throwing is bad as it deafens the error, but we will do it :)
+      console.error(error)
+      res.status(500).end()
     }
   }
 
