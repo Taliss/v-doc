@@ -5,12 +5,20 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Radio from '@mui/material/Radio'
 import Stack from '@mui/material/Stack'
+import { FileVisibility } from '@prisma/client'
+import axios, { AxiosError, AxiosResponse } from 'axios'
 import { UseConfirmProps } from 'hooks/useConfirm'
 import { useState } from 'react'
 import { FormProvider, useForm, UseFormProps } from 'react-hook-form'
 import { object, string } from 'yup'
 import ControlTextField from '../auth/ControlTextField'
 import GenericDialog from './GenericDialog'
+
+type RequestFileInput = { name: string; content: string; visibility: FileVisibility }
+interface CreateFile extends RequestFileInput {
+  authorId: string
+  id: string
+}
 
 type FormData = {
   fileName: string
@@ -36,13 +44,25 @@ const formOptions: UseFormProps<FormData> = {
 export default function CreateFileDialog({ open, closeHandler }: UseConfirmProps) {
   const methods = useForm<FormData>(formOptions)
   const [visibility, setVisibility] = useState<'private' | 'public'>('private')
-  // const { setValue, setError } = methods
+  const { setError } = methods
 
   const onSubmit = async (formData: FormData) => {
-    // TODO send form actually
-    console.log('FORMDATA: ', formData)
-
-    closeHandler()
+    //TODO no time for state-management and error handling...
+    try {
+      await axios.post<RequestFileInput, AxiosResponse<CreateFile>>('/api/file', {
+        name: formData.fileName,
+        content: formData.fileContent,
+        visibility,
+      })
+      closeHandler()
+    } catch (error) {
+      if (error instanceof AxiosError && error.code === AxiosError.ERR_BAD_REQUEST) {
+        setError('fileName', { message: error.response?.data?.message })
+      } else {
+        console.error(error)
+        closeHandler()
+      }
+    }
   }
 
   return (
