@@ -1,21 +1,25 @@
 import { TextSnippet } from '@mui/icons-material'
-import { IconButton, Paper, TableBody, Tooltip, Typography } from '@mui/material'
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import Paper from '@mui/material/Paper'
 import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
-import VisibilityIcon from '@mui/icons-material/Visibility'
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import Tooltip from '@mui/material/Tooltip'
+import Typography from '@mui/material/Typography'
 import axios from 'axios'
-import { SimpleFile } from 'pages/personal'
+import { PrivateFile } from 'pages/personal'
 import { useCallback } from 'react'
 
-type Props = {
-  rows: SimpleFile[]
+type FilesTableProps = {
+  rows: PrivateFile[]
+  tableVisibility?: 'private' | 'public'
 }
 
 const HeaderTextCell = ({ label }: { label: string }) => (
@@ -67,14 +71,14 @@ const ActionsCell = ({ visibility, id }: { visibility: string; id: string }) => 
   )
 }
 
-export default function FilesTable({ rows }: Props) {
+export default function FilesTable({ rows, tableVisibility = 'private' }: FilesTableProps) {
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} size="small" aria-label="file-listing">
         <TableHead>
           <TableRow>
             <HeaderTextCell label="name" />
-            <HeaderTextCell label="author" />
+            <HeaderTextCell label="owner" />
             <HeaderTextCell label="created at" />
             <HeaderTextCell label="updated at" />
             {/* Empty cell for horz-menu (extending t-header length) */}
@@ -99,7 +103,9 @@ export default function FilesTable({ rows }: Props) {
               <TableCell>{row.owner.email}</TableCell>
               <TableCell>{row.createdAt}</TableCell>
               <TableCell>{row.updatedAt}</TableCell>
-              <ActionsCell visibility={row.visibility.toLowerCase()} id={row.id} />
+              {tableVisibility === 'private' && (
+                <ActionsCell visibility={row.visibility.toLowerCase()} id={row.id} />
+              )}
             </TableRow>
           ))}
         </TableBody>
