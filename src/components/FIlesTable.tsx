@@ -27,9 +27,8 @@ const HeaderTextCell = ({ label }: { label: string }) => (
 )
 
 const ActionsCell = ({ visibility, id }: { visibility: string; id: string }) => {
-  const Icon = visibility.toLowerCase() === 'public' ? VisibilityIcon : VisibilityOffIcon
-  const title =
-    visibility.toLowerCase() === 'public' ? 'Switch file to private' : 'Switch file to public'
+  const Icon = visibility === 'public' ? VisibilityIcon : VisibilityOffIcon
+  const title = visibility === 'public' ? 'Switch file to private' : 'Switch file to public'
 
   const deleteAction = useCallback(async () => {
     try {
@@ -39,10 +38,22 @@ const ActionsCell = ({ visibility, id }: { visibility: string; id: string }) => 
     }
   }, [id])
 
+  const updateAction = useCallback(async () => {
+    console.log(visibility, ' ?')
+    try {
+      await axios.patch<{ fileId: string; visibility: 'public' | 'private' }>('/api/file', {
+        fileId: id,
+        visibility: visibility === 'private' ? 'public' : 'private',
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }, [id, visibility])
+
   return (
     <TableCell>
       <Tooltip title={title}>
-        <IconButton color="secondary" onClick={() => console.log('HELLO')}>
+        <IconButton color="secondary" onClick={() => updateAction()}>
           <Icon />
         </IconButton>
       </Tooltip>
@@ -88,7 +99,7 @@ export default function FilesTable({ rows }: Props) {
               <TableCell>{row.owner.email}</TableCell>
               <TableCell>{row.createdAt}</TableCell>
               <TableCell>{row.updatedAt}</TableCell>
-              <ActionsCell visibility={row.visibility} id={row.id} />
+              <ActionsCell visibility={row.visibility.toLowerCase()} id={row.id} />
             </TableRow>
           ))}
         </TableBody>

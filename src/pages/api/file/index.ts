@@ -13,7 +13,7 @@ const createFileSchema = object({
 })
 
 const updateVisibilitySchema = object({
-  id: string().required(),
+  fileId: string().required(),
   visibility: string().oneOf(['private', 'public']).required(),
 })
 
@@ -96,11 +96,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  if (req.method === 'PUT') {
+  if (req.method === 'PATCH') {
     // id should also be checked.
     try {
       await updateVisibilitySchema.validate(req.body)
-      const query = { where: { id: req.body?.id } }
+      const query = { where: { id: req.body.fileId } }
       const file = await prisma.file.findUnique(query)
 
       if (!file || file.authorId !== session.user.id) {
