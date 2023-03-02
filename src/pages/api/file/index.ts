@@ -41,6 +41,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // TODO isn't there better way to handle http methid-to-route mapping?
   // To put it in another way - better ways provided by nextjs, without external modules (next-connect or smth)
+  if (req.method === 'GET') {
+    // no cursor based pagination for this example...
+    try {
+      const results = await prisma.file.findMany({
+        where: {
+          authorId: session.user.id,
+        },
+        orderBy: {
+          name: 'desc',
+        },
+        select: {
+          id: true,
+          name: true,
+          visibility: true,
+          owner: { select: { email: true } },
+        },
+      })
+      return res.json(results)
+    } catch (error) {
+      console.error(error)
+      return res.status(500).end()
+    }
+  }
+
   if (req.method === 'POST') {
     //TODO Validation, middlewares should be avaiable, but haven't used them in nextjs
     try {
