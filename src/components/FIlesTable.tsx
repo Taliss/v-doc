@@ -7,8 +7,11 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import axios from 'axios'
+import { useCallback } from 'react'
 
 type SimpleFile = {
   id: string
@@ -33,16 +36,30 @@ const HeaderTextCell = ({ label }: { label: string }) => (
   </TableCell>
 )
 
-const ActionsCell = ({ visibility }: { visibility: string }) => {
+const ActionsCell = ({ visibility, id }: { visibility: string; id: string }) => {
   const Icon = visibility.toLowerCase() === 'public' ? VisibilityIcon : VisibilityOffIcon
   const title =
     visibility.toLowerCase() === 'public' ? 'Switch file to private' : 'Switch file to public'
+
+  const deleteAction = useCallback(async () => {
+    try {
+      await axios.delete<{ filedId: string }>('/api/file', { data: { fileId: id } })
+    } catch (error) {
+      console.error(error)
+    }
+  }, [id])
 
   return (
     <TableCell>
       <Tooltip title={title}>
         <IconButton color="secondary" onClick={() => console.log('HELLO')}>
           <Icon />
+        </IconButton>
+      </Tooltip>
+
+      <Tooltip title="Delete">
+        <IconButton color="warning" onClick={() => deleteAction()}>
+          <DeleteForeverIcon />
         </IconButton>
       </Tooltip>
     </TableCell>
@@ -93,7 +110,7 @@ export default function FilesTable({ rows }: Props) {
               <TableCell>{row.owner.email}</TableCell>
               <TableCell>{row.createdAt}</TableCell>
               <TableCell>{row.updatedAt}</TableCell>
-              <ActionsCell visibility={row.visibility} />
+              <ActionsCell visibility={row.visibility} id={row.id} />
             </TableRow>
           ))}
         </TableBody>
