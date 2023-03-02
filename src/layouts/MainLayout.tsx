@@ -3,8 +3,6 @@ import { ReactNode } from 'react'
 
 import Appbar from '@/components/Appbar'
 import Navbar from '@/components/Navbar'
-import AddRoundedIcon from '@mui/icons-material/AddRounded'
-import { IconButton, Tooltip } from '@mui/material'
 
 import CreateFileDialog from '@/components/popovers/CreateFileDialog'
 import Container from '@mui/material/Container'
@@ -23,12 +21,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         <Appbar />
         <Navbar />
 
-        <Container maxWidth="lg" disableGutters>
-          <Tooltip title="New File">
-            <IconButton color="primary" onClick={createFile.openHandler}>
-              <AddRoundedIcon />
-            </IconButton>
-          </Tooltip>
+        <Container maxWidth="lg" disableGutters sx={{ mt: 4 }}>
           {children}
         </Container>
       </Box>

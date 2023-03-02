@@ -1,9 +1,12 @@
-import { Container, Stack } from '@mui/material'
+import AddRounded from '@mui/icons-material/AddRounded'
+import { Container, IconButton, Stack, Tooltip } from '@mui/material'
 import { styled } from '@mui/material/styles'
+import useConfirm from 'hooks/useConfirm'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import routes from 'routes'
+import CreateFileDialog from './popovers/CreateFileDialog'
 
 const StyledLink = styled(Link)(({ theme }) => ({
   display: 'inline-block',
@@ -46,6 +49,8 @@ const StyledLink = styled(Link)(({ theme }) => ({
 export default function Navbar() {
   const { status } = useSession()
   const router = useRouter()
+  const createFile = useConfirm({ disableBackdropClose: true })
+
   return (
     <Container
       component="nav"
@@ -57,24 +62,36 @@ export default function Navbar() {
         alignItems: 'flex-end',
       }}
     >
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        pt={{ xs: 2, sm: 0 }}
-        spacing={{ xs: 1, sm: 4 }}
-      >
-        <StyledLink
-          href={routes.public}
-          className={router.pathname === `${routes.public}` ? 'active' : ''}
+      <Stack direction="row" justifyContent="space-between" flexGrow={1}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          pt={{ xs: 2, sm: 0 }}
+          spacing={{ xs: 1, sm: 4 }}
         >
-          Public
-        </StyledLink>
-        {status === 'authenticated' && (
           <StyledLink
-            href={routes.personal}
-            className={router.pathname === `${routes.personal}` ? 'active' : ''}
+            href={routes.public}
+            className={router.pathname === `${routes.public}` ? 'active' : ''}
           >
-            Personal
+            Public
           </StyledLink>
+          {status === 'authenticated' && (
+            <StyledLink
+              href={routes.personal}
+              className={router.pathname === `${routes.personal}` ? 'active' : ''}
+            >
+              Personal
+            </StyledLink>
+          )}
+        </Stack>
+        {status === 'authenticated' && (
+          <>
+            <Tooltip title="New File">
+              <IconButton color="primary" onClick={createFile.openHandler}>
+                <AddRounded />
+              </IconButton>
+            </Tooltip>
+            {createFile.open && <CreateFileDialog {...createFile} />}
+          </>
         )}
       </Stack>
     </Container>
