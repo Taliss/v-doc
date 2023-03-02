@@ -19,6 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const hash = await bcrypt.hash(password, 10)
+    // remove password from data, prisma returns all fields after create...
     const { password: pass, ...createdUser } = await prisma.user.create({
       data: { email, password: hash },
     })
