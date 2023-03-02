@@ -11,18 +11,8 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import axios from 'axios'
+import { SimpleFile } from 'pages/personal'
 import { useCallback } from 'react'
-
-type SimpleFile = {
-  id: string
-  name: string
-  createdAt: string
-  updatedAt: string
-  visibility: string
-  owner: {
-    email: string
-  }
-}
 
 type Props = {
   rows: SimpleFile[]
@@ -95,18 +85,6 @@ export default function FilesTable({ rows }: Props) {
                 </Box>
                 {row.name}
               </TableCell>
-              {/* <TableCell>
-                <Box sx={{ display: 'flex' }}>
-                  <>
-                    {row.sharedWith.slice(0, 7).map((user, index) => {
-                      return <UserAvatar key={index} user={user} />
-                    })}
-                    {row.sharedWith.length > 7 && (
-                      <ShowMoreUsersTooltip leftOverUsers={row.sharedWith.slice(7)} />
-                    )}
-                  </>
-                </Box>
-              </TableCell> */}
               <TableCell>{row.owner.email}</TableCell>
               <TableCell>{row.createdAt}</TableCell>
               <TableCell>{row.updatedAt}</TableCell>
