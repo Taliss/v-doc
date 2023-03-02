@@ -44,17 +44,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     // no cursor based pagination for this example...
     try {
+      // Prisma `exclude` features is pending for now...
       const results = await prisma.file.findMany({
         where: {
           authorId: session.user.id,
         },
         orderBy: {
-          name: 'desc',
+          createdAt: 'desc',
         },
         select: {
           id: true,
           name: true,
           visibility: true,
+          updatedAt: true,
+          createdAt: true,
           owner: { select: { email: true } },
         },
       })
