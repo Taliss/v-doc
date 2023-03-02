@@ -1,5 +1,5 @@
 import prisma from '@/prisma-client'
-import { FileVisibility, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import http from 'http'
 import { getServerSession } from 'next-auth'
 import { NextApiRequest, NextApiResponse } from 'next/types'
@@ -10,6 +10,11 @@ const createFileSchema = object({
   name: string().required().trim().min(1),
   content: string().optional(),
   visibility: string().oneOf(['private', 'public']).optional(),
+})
+
+const updateVisibilitySchema = object({
+  id: string().required(),
+  visibility: string().oneOf(['private', 'public']).required(),
 })
 
 // TODO: PIPES - MIDDLEWARES - COMPOSE ?!?!?
@@ -74,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await createFileSchema.validate(req.body)
       const file = await createFile({
         name: req.body.name,
-        visibility: req.body?.visibility?.toUpperCase() || FileVisibility.PRIVATE,
+        visibility: req.body.visibility.toUpperCase(),
         content: req.body.content,
         authorId: session.user.id,
       })
@@ -91,9 +96,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
+  if (req.method === 'PUT') {
+    // id should also be checked.
+    try {
+      await updateVisibilitySchema.validate(req.body)
+      const query = { where: { id: req.body?.id } }
+      const file = await prisma.file.findUnique(query)
+
+      if (!file || file.authorId !== session.user.id) {
+        // for security reasons better not expose info if file exists or not
+        return res.status(404).end()
+      }
+
+      await prisma.file.update({
+        ...query,
+        data: { visibility: req.body.visibility.toUpperCase() },
+      })
+      return res.status(200).end()
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return res.status(400).json({ message: error.message })
+      }
+      return res.status(500).end()
+    }
+  }
+
   if (req.method === 'DELETE') {
     // TODO: Not sure if Prisma supports RLS so we stick with extra query
-    if (!req.body.fileId) {
+    if (!req?.body.fileId) {
       return res.status(400).end()
     }
 
