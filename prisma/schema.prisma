@@ -22,11 +22,13 @@ model User {
 
 model File {
   id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name       String         @unique
+  name       String
   content    String         @default("")
   owner      User           @relation("OwnedFiles", fields: [authorId], references: [id])
   authorId   String         @db.Uuid
   visibility FileVisibility @default(PRIVATE)
+
+  @@unique([authorId, name], name: "fileAuthorIdentifier")
 }
 
 enum FileVisibility {
