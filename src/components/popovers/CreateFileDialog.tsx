@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { FormProvider, useForm, UseFormProps } from 'react-hook-form'
 import { object, string } from 'yup'
 import ControlTextField from '../auth/ControlTextField'
+import Editor from '../Editor'
 import GenericDialog from './GenericDialog'
 
 type RequestFileInput = { name: string; content: string; visibility: FileVisibility }
@@ -131,7 +132,7 @@ export default function CreateFileDialog({ open, closeHandler }: UseConfirmProps
               </ListItem>
             </Stack>
           </Stack>
-          <ControlTextField name="fileContent" placeholder="File Content" multiline minRows={14} />
+          <Editor />
         </Stack>
       </GenericDialog>
     </FormProvider>
