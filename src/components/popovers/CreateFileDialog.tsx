@@ -8,10 +8,12 @@ import Stack from '@mui/material/Stack'
 import { FileVisibility } from '@prisma/client'
 import axios, { AxiosError, AxiosResponse } from 'axios'
 import { UseConfirmProps } from 'hooks/useConfirm'
+import { useEditor } from 'hooks/useEditor'
 import { useState } from 'react'
 import { FormProvider, useForm, UseFormProps } from 'react-hook-form'
 import { object, string } from 'yup'
 import ControlTextField from '../auth/ControlTextField'
+import { LexicalEditor } from '../editor/LexicalEditor'
 import GenericDialog from './GenericDialog'
 
 type RequestFileInput = { name: string; content: string; visibility: FileVisibility }
@@ -37,7 +39,10 @@ const formOptions: UseFormProps<FormData> = {
   ),
 }
 
+const createEditorId = 'NEW'
+
 export default function CreateFileDialog({ open, closeHandler }: UseConfirmProps) {
+  const createEditor = useEditor(createEditorId)
   const methods = useForm<FormData>(formOptions)
   const [visibility, setVisibility] = useState<'private' | 'public'>('private')
   const { setError } = methods
@@ -47,6 +52,7 @@ export default function CreateFileDialog({ open, closeHandler }: UseConfirmProps
     try {
       await axios.post<RequestFileInput, AxiosResponse<CreateFile>>('/api/file', {
         name: formData.fileName,
+        content: createEditor?.getEditorState().toJSON(),
         visibility,
       })
       closeHandler()
@@ -126,6 +132,7 @@ export default function CreateFileDialog({ open, closeHandler }: UseConfirmProps
               </ListItem>
             </Stack>
           </Stack>
+          <LexicalEditor id={createEditorId} />
         </Stack>
       </GenericDialog>
     </FormProvider>

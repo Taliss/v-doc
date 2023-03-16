@@ -78,8 +78,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //TODO Validation, middlewares should be avaiable, but haven't used them in nextjs
     try {
       await createFileSchema.validate(req.body)
-      // TODO: look here !
-      console.log('BODY: ', req.body.content)
       const file = await createFile({
         name: req.body.name,
         visibility: req.body.visibility.toUpperCase(),
