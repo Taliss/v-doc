@@ -5,6 +5,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Paper from '@mui/material/Paper'
+import { styled } from '@mui/material/styles'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -17,11 +18,16 @@ import axios from 'axios'
 import router from 'next/router'
 import { PrivateFile } from 'pages/personal'
 import { useCallback } from 'react'
-
 type FilesTableProps = {
   rows: PrivateFile[]
   tableVisibility?: 'private' | 'public'
 }
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&.MuiTableRow-hover:hover': {
+    cursor: 'pointer',
+  },
+}))
 
 const HeaderTextCell = ({ label }: { label: string }) => (
   <TableCell>
@@ -88,7 +94,7 @@ export default function FilesTable({ rows, tableVisibility = 'private' }: FilesT
         </TableHead>
         <TableBody>
           {rows.map((row) => (
-            <TableRow hover key={row.id} onClick={() => router.push(`/files/${row.id}`)}>
+            <StyledTableRow hover key={row.id} onClick={() => router.push(`/files/${row.id}`)}>
               <TableCell component="th" scope="row">
                 <Box
                   sx={{
@@ -107,7 +113,8 @@ export default function FilesTable({ rows, tableVisibility = 'private' }: FilesT
               {tableVisibility === 'private' && (
                 <ActionsCell visibility={row.visibility.toLowerCase()} id={row.id} />
               )}
-            </TableRow>
+              {tableVisibility === 'public' && <TableCell />}
+            </StyledTableRow>
           ))}
         </TableBody>
       </Table>
