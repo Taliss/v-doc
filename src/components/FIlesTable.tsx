@@ -87,7 +87,7 @@ export default function FilesTable({ rows, tableVisibility = 'private' }: FilesT
         </TableHead>
         <TableBody>
           {rows.map((row) => (
-            <TableRow key={row.id}>
+            <TableRow hover key={row.id}>
               <TableCell component="th" scope="row">
                 <Box
                   sx={{
