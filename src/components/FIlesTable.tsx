@@ -14,6 +14,7 @@ import TableRow from '@mui/material/TableRow'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import axios from 'axios'
+import router from 'next/router'
 import { PrivateFile } from 'pages/personal'
 import { useCallback } from 'react'
 
@@ -87,7 +88,7 @@ export default function FilesTable({ rows, tableVisibility = 'private' }: FilesT
         </TableHead>
         <TableBody>
           {rows.map((row) => (
-            <TableRow hover key={row.id}>
+            <TableRow hover key={row.id} onClick={() => router.push(`/files/${row.id}`)}>
               <TableCell component="th" scope="row">
                 <Box
                   sx={{
