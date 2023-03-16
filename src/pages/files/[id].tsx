@@ -1,14 +1,24 @@
-import { getLayout } from '@/layouts/MainLayout'
+import FileLayout from '@/layouts/FileLayout'
+import MainLayout from '@/layouts/MainLayout'
+import { Box, Divider, Paper } from '@mui/material'
 import { ReactNode } from 'react'
 
 export default function File() {
-  return <p>Hello there</p>
+  return (
+    <Box pt={1}>
+      <Paper square variant="outlined" sx={{ height: '75vh' }}>
+        Hello there !
+      </Paper>
+    </Box>
+  )
 }
 
-File.getLayout = (page: ReactNode) =>
-  getLayout(
-    <>
-      <h1>Uga buga buga buga</h1>
+File.getLayout = (page: ReactNode) => {
+  return (
+    <MainLayout containerProps={{ sx: { mt: 0 } }}>
+      <Divider flexItem={false} sx={{ pb: 1 }} />
+      <FileLayout fileName="some name" owner="Vlahov" />
       {page}
-    </>
+    </MainLayout>
   )
+}

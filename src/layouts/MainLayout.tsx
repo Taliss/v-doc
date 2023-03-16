@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { ReactNode } from 'react'
+import { PropsWithChildren, ReactNode } from 'react'
 
 import Appbar from '@/components/Appbar'
 import Navbar from '@/components/Navbar'
@@ -7,10 +7,15 @@ import Navbar from '@/components/Navbar'
 import { EditorProvider } from '@/components/editor/EditorProvider'
 import CreateFileDialog from '@/components/popovers/CreateFileDialog'
 import Container from '@mui/material/Container'
+import { ContainerProps } from '@mui/system'
 import Box from '@mui/system/Box'
 import useConfirm from 'hooks/useConfirm'
 
-export default function MainLayout({ children }: { children: ReactNode }) {
+type MainLayoutProps = PropsWithChildren<{
+  containerProps?: ContainerProps
+}>
+
+export default function MainLayout({ children, containerProps }: MainLayoutProps) {
   const createFile = useConfirm({ disableBackdropClose: true })
 
   return (
@@ -23,7 +28,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
           <Appbar />
           <Navbar />
 
-          <Container maxWidth="lg" disableGutters sx={{ mt: 4 }}>
+          <Container maxWidth="lg" disableGutters sx={{ mt: 4 }} {...containerProps}>
             {children}
           </Container>
         </EditorProvider>
