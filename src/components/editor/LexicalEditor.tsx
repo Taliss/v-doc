@@ -9,9 +9,15 @@ export type LexicalEditorProps = {
   id: string
   editable?: boolean
   editorState?: InitialEditorStateType
+  editableClassName?: string
 }
 
-export function LexicalEditor({ id, editable = true, editorState }: LexicalEditorProps) {
+export function LexicalEditor({
+  id,
+  editable = true,
+  editorState,
+  editableClassName = 'editor-input',
+}: LexicalEditorProps) {
   const initialConfig = {
     namespace: 'V-Doc-Editor',
     onError(error: Error) {
@@ -23,7 +29,7 @@ export function LexicalEditor({ id, editable = true, editorState }: LexicalEdito
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <PlainTextPlugin
-        contentEditable={<ContentEditable className="editor-input" />}
+        contentEditable={<ContentEditable className={editableClassName} />}
         placeholder={<div className="editor-placeholder"></div>}
         ErrorBoundary={LexicalErrorBoundary}
       />

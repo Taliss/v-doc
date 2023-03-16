@@ -29,6 +29,10 @@ html {
   caret-color: #444;
 }
 
+.editor-view {
+  padding: 0 8px
+}
+
 .editor-placeholder {
   color: #999;
   overflow: hidden;
