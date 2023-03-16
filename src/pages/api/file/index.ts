@@ -8,7 +8,8 @@ import { authOptions, ServerSession } from '../auth/[...nextauth]'
 
 const createFileSchema = object({
   name: string().required().trim().min(1),
-  content: string().optional(),
+  // TODO add validation for content
+  // content: string().optional(),
   visibility: string().oneOf(['private', 'public']).optional(),
 })
 
@@ -77,6 +78,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //TODO Validation, middlewares should be avaiable, but haven't used them in nextjs
     try {
       await createFileSchema.validate(req.body)
+      // TODO: look here !
+      console.log('BODY: ', req.body.content)
       const file = await createFile({
         name: req.body.name,
         visibility: req.body.visibility.toUpperCase(),

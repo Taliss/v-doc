@@ -12,7 +12,6 @@ import { useState } from 'react'
 import { FormProvider, useForm, UseFormProps } from 'react-hook-form'
 import { object, string } from 'yup'
 import ControlTextField from '../auth/ControlTextField'
-import Editor from '../Editor'
 import GenericDialog from './GenericDialog'
 
 type RequestFileInput = { name: string; content: string; visibility: FileVisibility }
@@ -34,10 +33,6 @@ const formOptions: UseFormProps<FormData> = {
         .required('Please name your file')
         .trim()
         .min(1, 'File name should be atleast two characters long'),
-      fileContent: string()
-        .required('Please, add some content')
-        .trim()
-        .min(1, 'Please, add some content'),
     })
   ),
 }
@@ -52,7 +47,6 @@ export default function CreateFileDialog({ open, closeHandler }: UseConfirmProps
     try {
       await axios.post<RequestFileInput, AxiosResponse<CreateFile>>('/api/file', {
         name: formData.fileName,
-        content: formData.fileContent,
         visibility,
       })
       closeHandler()
@@ -132,7 +126,6 @@ export default function CreateFileDialog({ open, closeHandler }: UseConfirmProps
               </ListItem>
             </Stack>
           </Stack>
-          <Editor />
         </Stack>
       </GenericDialog>
     </FormProvider>
