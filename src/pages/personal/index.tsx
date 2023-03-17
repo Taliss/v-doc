@@ -4,7 +4,7 @@ import axios, { AxiosResponse } from 'axios'
 import { getServerSession } from 'next-auth'
 import { GetServerSideProps } from 'next/types'
 import { useEffect, useState } from 'react'
-import { authOptions } from './api/auth/[...nextauth]'
+import { authOptions } from '../api/auth/[...nextauth]'
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   //For getting session on server side the docs recommend using getServerSession as per

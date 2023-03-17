@@ -3,7 +3,7 @@ import { getLayout } from '@/layouts/MainLayout'
 import FilesTable from '@/components/FIlesTable'
 import axios, { AxiosResponse } from 'axios'
 import { useEffect, useState } from 'react'
-import { PrivateFile } from './personal'
+import { PrivateFile } from '../personal'
 
 export default function Public() {
   const [files, setFiles] = useState<PrivateFile[] | null>(null)
