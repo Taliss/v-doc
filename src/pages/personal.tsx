@@ -38,7 +38,7 @@ export default function Personal() {
   // useQuery is needed, no refreshing after insert/delete/update actions now
   useEffect(() => {
     ;(async () => {
-      const { data } = await axios.get<unknown, AxiosResponse<PrivateFile[]>>('/api/file')
+      const { data } = await axios.get<unknown, AxiosResponse<PrivateFile[]>>('/api/file/private')
       setFiles(data)
     })()
     return () => {}
