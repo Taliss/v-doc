@@ -30,11 +30,12 @@ export const getServerSideProps: GetServerSideProps<FileWithOwnerProps> = async 
         name: true,
         content: true,
         owner: { select: { email: true } },
+        visibility: true
       },
     })
 
     // TODO: nextjs supports redirects as middleware, need to reed the docs...
-    if (!file) {
+    if (!file || file.visibility !== 'PUBLIC') {
       return { redirect: { destination: routes.root, permanent: false } }
     }
 
