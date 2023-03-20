@@ -43,16 +43,15 @@ const ActionsCell = ({ visibility, id }: { visibility: string; id: string }) => 
 
   const deleteAction = useCallback(async () => {
     try {
-      await axios.delete<{ filedId: string }>('/api/file', { data: { fileId: id } })
+      await axios.delete<{ filedId: string }>('/api/file/private', { data: { fileId: id } })
     } catch (error) {
       console.error(error)
     }
   }, [id])
 
   const updateAction = useCallback(async () => {
-    console.log(visibility, ' ?')
     try {
-      await axios.patch<{ fileId: string; visibility: 'public' | 'private' }>('/api/file', {
+      await axios.patch<{ fileId: string; visibility: 'public' | 'private' }>('/api/file/private', {
         fileId: id,
         visibility: visibility === 'private' ? 'public' : 'private',
       })
@@ -62,7 +61,12 @@ const ActionsCell = ({ visibility, id }: { visibility: string; id: string }) => 
   }, [id, visibility])
 
   return (
-    <TableCell>
+    <TableCell
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+      }}
+    >
       <Tooltip title={title}>
         <IconButton color="secondary" onClick={() => updateAction()}>
           <Icon />

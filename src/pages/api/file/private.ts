@@ -1,5 +1,5 @@
 import prisma from '@/prisma-client'
-import { Prisma } from '@prisma/client'
+import { FileVisibility, Prisma } from '@prisma/client'
 import http from 'http'
 import { getServerSession } from 'next-auth'
 import { NextApiRequest, NextApiResponse } from 'next/types'
@@ -9,13 +9,16 @@ import { authOptions, ServerSession } from '../auth/[...nextauth]'
 const createFileSchema = object({
   name: string().required().trim().min(1),
   // TODO add validation for content
-  // content: string().optional(),
+  content: object().optional(),
   visibility: string().oneOf(['private', 'public']).optional(),
 })
 
 const updateVisibilitySchema = object({
   fileId: string().required(),
-  visibility: string().oneOf(['private', 'public']).required(),
+  visibility: string().oneOf(['private', 'public']).optional(),
+  content: object().optional(),
+}).test('at-least-one-property', 'Provide visibility or content field', (value) => {
+  return !!(value.visibility || value.content)
 })
 
 // TODO: PIPES - MIDDLEWARES - COMPOSE ?!?!?
@@ -108,10 +111,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // for security reasons better not expose info if file exists or not
         return res.status(404).end()
       }
+      const data: { visibility?: FileVisibility; content?: string } = {}
+
+      if (req.body?.visibility) data.visibility = req.body.visibility.toUpperCase()
+      if (req.body?.content) data.content = req.body.content
 
       await prisma.file.update({
         ...query,
-        data: { visibility: req.body.visibility.toUpperCase() },
+        data,
       })
       return res.status(200).end()
     } catch (error) {
