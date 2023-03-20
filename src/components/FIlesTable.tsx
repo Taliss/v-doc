@@ -79,6 +79,7 @@ const ActionsCell = ({ visibility, id }: { visibility: string; id: string }) => 
 }
 
 export default function FilesTable({ rows, tableVisibility = 'private' }: FilesTableProps) {
+  const resolvedPath = tableVisibility === 'private' ? 'personal' : 'public'
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} size="small" aria-label="file-listing">
@@ -94,7 +95,11 @@ export default function FilesTable({ rows, tableVisibility = 'private' }: FilesT
         </TableHead>
         <TableBody>
           {rows.map((row) => (
-            <StyledTableRow hover key={row.id} onClick={() => router.push(`/files/${row.id}`)}>
+            <StyledTableRow
+              hover
+              key={row.id}
+              onClick={() => router.push(`/${resolvedPath}/${row.id}`)}
+            >
               <TableCell component="th" scope="row">
                 <Box
                   sx={{
