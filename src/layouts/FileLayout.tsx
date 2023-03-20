@@ -1,7 +1,10 @@
 import { TextSnippet } from '@mui/icons-material'
 import { Button, Typography } from '@mui/material'
 import Stack from '@mui/material/Stack'
+import axios from 'axios'
 import { useEditor } from 'hooks/useEditor'
+import { EditorState } from 'lexical'
+import { useCallback } from 'react'
 
 type FileLayoutProps = {
   fileName: string
@@ -12,14 +15,18 @@ type FileLayoutProps = {
 
 const SaveButton = ({ fileId }: { fileId: string }) => {
   const editor = useEditor(fileId)
+  const updateContentAction = useCallback(async () => {
+    try {
+      await axios.patch<{ fileId: string; content: EditorState }>('/api/file/private', {
+        fileId,
+        content: editor?.getEditorState().toJSON(),
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }, [editor?.getEditorState()])
   return (
-    <Button
-      sx={{ marginLeft: 'auto' }}
-      onClick={() => {
-        // TODO: fire api call
-        console.log(editor?.getEditorState()?.toJSON())
-      }}
-    >
+    <Button sx={{ marginLeft: 'auto' }} onClick={updateContentAction}>
       SAVE
     </Button>
   )
