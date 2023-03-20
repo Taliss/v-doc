@@ -1,7 +1,8 @@
 import AlertSnackbar from '@/components/popovers/AlertSnackbar'
 import { TextSnippet } from '@mui/icons-material'
+import SaveIcon from '@mui/icons-material/Save'
+import ShareIcon from '@mui/icons-material/Share'
 import { AlertColor, Button, Typography } from '@mui/material'
-
 import Stack from '@mui/material/Stack'
 import axios from 'axios'
 import { useEditor } from 'hooks/useEditor'
@@ -45,7 +46,12 @@ const SaveButton = ({ fileId }: { fileId: string }) => {
   }, [editor?.getEditorState()])
   return (
     <>
-      <Button sx={{ marginLeft: 'auto' }} onClick={updateContentAction}>
+      <Button
+        size="small"
+        variant="contained"
+        onClick={updateContentAction}
+        startIcon={<SaveIcon />}
+      >
         SAVE
       </Button>
       {open && (
@@ -60,6 +66,23 @@ const SaveButton = ({ fileId }: { fileId: string }) => {
   )
 }
 
+const ShareButton = () => {
+  return (
+    <Button size="small" variant="contained" startIcon={<ShareIcon />}>
+      Share
+    </Button>
+  )
+}
+
+const LayoutMenu = ({ isOwner, fileId }: { isOwner: boolean; fileId: string }) => {
+  return (
+    <Stack direction="row" sx={{ marginLeft: 'auto', pt: 0.5, pb: 0.5 }} spacing={2}>
+      {isOwner && <ShareButton />}
+      <SaveButton fileId={fileId} />
+    </Stack>
+  )
+}
+
 export default function FileLayout({ fileName, owner, fileId }: FileLayoutProps) {
   return (
     <Stack direction="row" pt={1}>
@@ -68,7 +91,7 @@ export default function FileLayout({ fileName, owner, fileId }: FileLayoutProps)
         <Typography variant="subtitle2">{fileName}</Typography>
         <Typography variant="subtitle2">{owner}</Typography>
       </Stack>
-      {fileId && <SaveButton fileId={fileId} />}
+      {fileId && <LayoutMenu fileId={fileId} isOwner />}
     </Stack>
   )
 }
