@@ -1,10 +1,12 @@
 import AlertSnackbar from '@/components/popovers/AlertSnackbar'
+import ShareFileDialog from '@/components/popovers/ShareFileDialog'
 import { TextSnippet } from '@mui/icons-material'
 import SaveIcon from '@mui/icons-material/Save'
 import ShareIcon from '@mui/icons-material/Share'
 import { AlertColor, Button, Typography } from '@mui/material'
 import Stack from '@mui/material/Stack'
 import axios from 'axios'
+import useConfirm from 'hooks/useConfirm'
 import { useEditor } from 'hooks/useEditor'
 import { EditorState } from 'lexical'
 import { useCallback, useState } from 'react'
@@ -67,10 +69,20 @@ const SaveButton = ({ fileId }: { fileId: string }) => {
 }
 
 const ShareButton = () => {
+  const shareFile = useConfirm({})
+
   return (
-    <Button size="small" variant="contained" startIcon={<ShareIcon />}>
-      Share
-    </Button>
+    <>
+      <Button
+        size="small"
+        variant="contained"
+        startIcon={<ShareIcon />}
+        onClick={shareFile.openHandler}
+      >
+        Share
+      </Button>
+      {shareFile.open && <ShareFileDialog {...shareFile} />}
+    </>
   )
 }
 
