@@ -9,7 +9,7 @@ import { ParsedUrlQuery } from 'querystring'
 import { ReactNode } from 'react'
 import routes from 'routes'
 
-type FileWithOwnerProps = {
+export type FileWithOwnerProps = {
   file: {
     id: string
     name: string
