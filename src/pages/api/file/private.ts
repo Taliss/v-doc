@@ -148,7 +148,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // actually delete the file, no time for archived
       await prisma.file.delete(fileMatchQuery)
 
-      return res.status(404).end()
+      return res.status(200).end()
     } catch (error) {
       // not throwing is bad as it deafens the error, but we will do it :)
       console.error(error)

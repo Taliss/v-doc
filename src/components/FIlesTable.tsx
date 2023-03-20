@@ -1,9 +1,5 @@
 import { TextSnippet } from '@mui/icons-material'
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
-import VisibilityIcon from '@mui/icons-material/Visibility'
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import Box from '@mui/material/Box'
-import IconButton from '@mui/material/IconButton'
 import Paper from '@mui/material/Paper'
 import { styled } from '@mui/material/styles'
 import Table from '@mui/material/Table'
@@ -12,12 +8,10 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import axios from 'axios'
 import router from 'next/router'
 import { PrivateFile } from 'pages/personal'
-import { useCallback } from 'react'
+import ActionsCell from './ActionsCell'
 type FilesTableProps = {
   rows: PrivateFile[]
   tableVisibility?: 'private' | 'public'
@@ -36,51 +30,6 @@ const HeaderTextCell = ({ label }: { label: string }) => (
     </Typography>
   </TableCell>
 )
-
-const ActionsCell = ({ visibility, id }: { visibility: string; id: string }) => {
-  const Icon = visibility === 'public' ? VisibilityIcon : VisibilityOffIcon
-  const title = visibility === 'public' ? 'Switch file to private' : 'Switch file to public'
-
-  const deleteAction = useCallback(async () => {
-    try {
-      await axios.delete<{ filedId: string }>('/api/file/private', { data: { fileId: id } })
-    } catch (error) {
-      console.error(error)
-    }
-  }, [id])
-
-  const updateAction = useCallback(async () => {
-    try {
-      await axios.patch<{ fileId: string; visibility: 'public' | 'private' }>('/api/file/private', {
-        fileId: id,
-        visibility: visibility === 'private' ? 'public' : 'private',
-      })
-    } catch (error) {
-      console.error(error)
-    }
-  }, [id, visibility])
-
-  return (
-    <TableCell
-      onClick={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-      }}
-    >
-      <Tooltip title={title}>
-        <IconButton color="secondary" onClick={() => updateAction()}>
-          <Icon />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip title="Delete">
-        <IconButton color="warning" onClick={() => deleteAction()}>
-          <DeleteForeverIcon />
-        </IconButton>
-      </Tooltip>
-    </TableCell>
-  )
-}
 
 export default function FilesTable({ rows, tableVisibility = 'private' }: FilesTableProps) {
   const resolvedPath = tableVisibility === 'private' ? 'personal' : 'public'
