@@ -50,7 +50,7 @@ export default function CreateFileDialog({ open, closeHandler }: UseConfirmProps
   const onSubmit = async (formData: FormData) => {
     //TODO no time for state-management and error handling...
     try {
-      await axios.post<RequestFileInput, AxiosResponse<CreateFile>>('/api/file', {
+      await axios.post<RequestFileInput, AxiosResponse<CreateFile>>('/api/file/private', {
         name: formData.fileName,
         content: createEditor?.getEditorState().toJSON(),
         visibility,
