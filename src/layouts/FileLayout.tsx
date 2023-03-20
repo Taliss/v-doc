@@ -1,10 +1,12 @@
+import AlertSnackbar from '@/components/popovers/AlertSnackbar'
 import { TextSnippet } from '@mui/icons-material'
-import { Button, Typography } from '@mui/material'
+import { AlertColor, Button, Typography } from '@mui/material'
+
 import Stack from '@mui/material/Stack'
 import axios from 'axios'
 import { useEditor } from 'hooks/useEditor'
 import { EditorState } from 'lexical'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 type FileLayoutProps = {
   fileName: string
@@ -14,6 +16,19 @@ type FileLayoutProps = {
 }
 
 const SaveButton = ({ fileId }: { fileId: string }) => {
+  const [open, setOpen] = useState(false)
+  const [actionStatus, setActionStatus] = useState<{ message: string; status: AlertColor }>({
+    status: 'success',
+    message: 'File saved',
+  })
+
+  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return
+    }
+    setOpen(false)
+  }
+
   const editor = useEditor(fileId)
   const updateContentAction = useCallback(async () => {
     try {
@@ -23,12 +38,25 @@ const SaveButton = ({ fileId }: { fileId: string }) => {
       })
     } catch (error) {
       console.error(error)
+      setActionStatus({ message: 'Something went wrong', status: 'error' })
+    } finally {
+      setOpen(true)
     }
   }, [editor?.getEditorState()])
   return (
-    <Button sx={{ marginLeft: 'auto' }} onClick={updateContentAction}>
-      SAVE
-    </Button>
+    <>
+      <Button sx={{ marginLeft: 'auto' }} onClick={updateContentAction}>
+        SAVE
+      </Button>
+      {open && (
+        <AlertSnackbar
+          open={open}
+          onClose={handleClose}
+          message={actionStatus.message}
+          severity={actionStatus.status}
+        />
+      )}
+    </>
   )
 }
 
