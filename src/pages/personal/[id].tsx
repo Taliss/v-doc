@@ -62,7 +62,7 @@ export const getServerSideProps: GetServerSideProps<FileWithOwnerProps> = async 
 export default function PrivateFile({ file }: FileWithOwnerProps) {
   return (
     <>
-      <FileLayout fileName={file.name} owner={file.owner.email} />
+      <FileLayout fileName={file.name} owner={file.owner.email} fileId={file.id} />
       <Box pt={1}>
         <Paper square variant="outlined" sx={{ height: '75vh' }}>
           <LexicalEditor
