@@ -4,7 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 
 export type ServerSession = {
   user: {
-    name: string
+    email: string
     id: string
   }
   expires: ISODateString
