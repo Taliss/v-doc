@@ -39,7 +39,11 @@ const users = [
 //   />
 // )
 
-export default function ShareFileDialog({ open = true, closeHandler }: UseConfirmProps) {
+export default function ShareFileDialog({
+  open = true,
+  closeHandler,
+  fileId,
+}: UseConfirmProps & { fileId: string }) {
   // const [openAutocomplete, setAutocompleteOpen] = useState(false)
 
   return (
@@ -50,7 +54,7 @@ export default function ShareFileDialog({ open = true, closeHandler }: UseConfir
       title="Share File"
       primaryLabel="Done"
     >
-      <DialogTabs />
+      <DialogTabs fileId={fileId} />
     </GenericDialog>
   )
 }

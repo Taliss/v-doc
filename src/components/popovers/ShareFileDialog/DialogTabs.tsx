@@ -2,6 +2,7 @@ import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import * as React from 'react'
+import AccessTab from './AccessTab'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -32,7 +33,7 @@ function a11yProps(index: number) {
   }
 }
 
-export default function DialogTabs() {
+export default function DialogTabs({ fileId }: { fileId: string }) {
   const [value, setValue] = React.useState(0)
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -51,7 +52,7 @@ export default function DialogTabs() {
         Invite People
       </TabPanel>
       <TabPanel value={value} index={1}>
-        Manage Access
+        <AccessTab fileId={fileId} />
       </TabPanel>
     </>
   )

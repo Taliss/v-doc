@@ -20,7 +20,7 @@ const resolveFileWithPermissions = async (fileId: string, sessionUserId: string)
     select: {
       authorId: true,
       name: true,
-      FileMembership: { select: { userId: true, role: true } },
+      FileMembership: { select: { role: true, user: { select: { id: true, email: true } } } },
     },
   })
 

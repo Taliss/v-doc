@@ -68,7 +68,7 @@ const SaveButton = ({ fileId }: { fileId: string }) => {
   )
 }
 
-const ShareButton = () => {
+const ShareButton = ({ fileId }: { fileId: string }) => {
   const shareFile = useConfirm({})
 
   return (
@@ -81,7 +81,7 @@ const ShareButton = () => {
       >
         Share
       </Button>
-      {shareFile.open && <ShareFileDialog {...shareFile} />}
+      {shareFile.open && <ShareFileDialog {...shareFile} fileId={fileId} />}
     </>
   )
 }
@@ -89,7 +89,7 @@ const ShareButton = () => {
 const LayoutMenu = ({ isOwner, fileId }: { isOwner: boolean; fileId: string }) => {
   return (
     <Stack direction="row" sx={{ marginLeft: 'auto', pt: 0.5, pb: 0.5 }} spacing={2}>
-      {isOwner && <ShareButton />}
+      {isOwner && <ShareButton fileId={fileId} />}
       <SaveButton fileId={fileId} />
     </Stack>
   )
