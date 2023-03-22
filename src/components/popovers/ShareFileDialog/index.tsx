@@ -53,6 +53,8 @@ export default function ShareFileDialog({
       closeHandler={closeHandler}
       title="Share File"
       primaryLabel="Done"
+      confirmActionOnly
+      primaryHandler={() => closeHandler()}
     >
       <DialogTabs fileId={fileId} />
     </GenericDialog>

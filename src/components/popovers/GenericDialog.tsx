@@ -35,6 +35,7 @@ const CloseModalButton = ({ onClose }: CloseModalButtonProps) => (
 )
 
 type Props<T> = {
+  confirmActionOnly?: boolean
   open: boolean
   dialogProps?: Partial<DialogProps>
   title?: ReactNode
@@ -57,6 +58,7 @@ type Props<T> = {
   closeHandler?: () => void | Promise<void>
 }
 export default function GenericDialog<T = undefined>({
+  confirmActionOnly,
   open,
   dialogProps,
   title,
@@ -77,7 +79,7 @@ export default function GenericDialog<T = undefined>({
         <DialogContent {...contentProps}>{children}</DialogContent>
         <DialogActions {...actionsProps} sx={{ p: 3 }}>
           {closeHandler && <CloseModalButton onClose={closeHandler} />}
-          {closeHandler && (
+          {closeHandler && !confirmActionOnly && (
             <Button onClick={closeHandler} disabled={loading} variant="contained">
               Cancel
             </Button>
