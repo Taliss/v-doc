@@ -91,7 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       await removeFilePermissionSchema.validate(req.body)
       const { userId }: { userId: string } = req.body
-      await prisma.fileMembership.delete({
+      const permission = await prisma.fileMembership.delete({
         where: {
           filePermissionIdentifier: {
             userId,
@@ -99,7 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
         },
       })
-      return res.status(200).end()
+      return res.json(permission)
     }
 
     res.status(405).end()

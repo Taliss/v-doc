@@ -67,6 +67,29 @@ const RoleMenu = ({ role, userId, fileId }: RoleMenuProps) => {
             }
           }
         )
+        handleClose()
+      },
+    }
+  )
+
+  const removeUserAccess = useMutation(
+    (userId: string) => {
+      return axios.delete<{ userId: string }, AxiosResponse<FileMembership>>(
+        `/api/file/${fileId}/permissions`,
+        {
+          data: { userId },
+        }
+      )
+    },
+    {
+      onSuccess: ({ data }) => {
+        queryClient.setQueryData<{ memberships: Membership[] }>(
+          ['filePermissions', fileId],
+          (oldData) => ({
+            memberships: oldData?.memberships.filter(({ user }) => user.id !== data.userId) || [],
+          })
+        )
+        handleClose()
       },
     }
   )
@@ -95,7 +118,7 @@ const RoleMenu = ({ role, userId, fileId }: RoleMenuProps) => {
           </MenuItem>
         ))}
         <Divider />
-        <MenuItem>
+        <MenuItem onClick={() => removeUserAccess.mutate(userId)}>
           <ListItemText>Remove Access</ListItemText>
         </MenuItem>
       </Menu>
