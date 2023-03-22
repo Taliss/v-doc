@@ -108,7 +108,11 @@ const RoleMenu = ({ role, userId, fileId }: RoleMenuProps) => {
       </Button>
       <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>
         {menuOptions.map((roleOption) => (
-          <MenuItem dense onClick={() => updatePermission.mutate({ userId, role: roleOption })}>
+          <MenuItem
+            dense
+            onClick={() => updatePermission.mutate({ userId, role: roleOption })}
+            key={roleOption}
+          >
             {roleOption === role && (
               <ListItemIcon>
                 <Check />
@@ -138,7 +142,7 @@ export default function AccessTab({ fileId }: { fileId: string }) {
     <List dense disablePadding>
       {data?.memberships.map(({ user, role }) => {
         return (
-          <ListItem sx={{ pl: 0, pr: 0 }}>
+          <ListItem sx={{ pl: 0, pr: 0 }} key={user.id}>
             <ListItemAvatar>
               <Avatar>
                 <BeachAccessIcon />
