@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === 'GET') {
       const file = await resolveFileWithPermissions(id as string, session.user.id)
       if (!file) return res.status(404).end()
-      return res.json(file)
+      return res.json({ memberships: file.FileMembership })
     }
 
     if (req.method === 'PATCH') {
@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // do not allow self-assigning roles
       if (file.authorId === userId)
         return res.status(400).json({ message: 'Owner permissions already applied' })
-      await prisma.fileMembership.update({
+      const permission = await prisma.fileMembership.update({
         where: {
           filePermissionIdentifier: {
             userId,
@@ -63,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           role,
         },
       })
-      return res.status(200).end()
+      return res.json(permission)
     }
 
     if (req.method === 'POST') {

@@ -1,3 +1,4 @@
+import { Check } from '@mui/icons-material'
 import BeachAccessIcon from '@mui/icons-material/BeachAccess'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import {
@@ -7,14 +8,15 @@ import {
   List,
   ListItem,
   ListItemAvatar,
+  ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
 } from '@mui/material'
-import { FileRoles } from '@prisma/client'
+import { FileMembership, FileRoles } from '@prisma/client'
 import axios, { AxiosResponse } from 'axios'
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 
 type Membership = {
   user: {
@@ -23,14 +25,16 @@ type Membership = {
   }
   role: FileRoles
 }
-
-type FilePermissions = {
+type UpdatePermissionProps = {
+  role: FileRoles
+  userId: string
+}
+type RoleMenuProps = UpdatePermissionProps & {
   fileId: string
-  FileMembership: Membership[]
 }
 
-const menuOptions = ['Viewer', 'Commenter', 'Editor'] as const
-const RoleMenu = () => {
+const menuOptions = ['VIEWER', 'COMMENTER', 'EDITOR'] as const
+const RoleMenu = ({ role, userId, fileId }: RoleMenuProps) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -39,6 +43,33 @@ const RoleMenu = () => {
   const handleClose = () => {
     setAnchorEl(null)
   }
+
+  const queryClient = useQueryClient()
+  const updatePermission = useMutation(
+    (userRole: UpdatePermissionProps) => {
+      return axios.patch<unknown, AxiosResponse<FileMembership>>(
+        `/api/file/${fileId}/permissions`,
+        userRole
+      )
+    },
+    {
+      onSuccess: ({ data }) => {
+        queryClient.setQueryData<{ memberships: Membership[] }>(
+          ['filePermissions', fileId],
+          (oldData) => {
+            return {
+              memberships:
+                oldData?.memberships.map((membership) => {
+                  if (membership.user.id === data.userId)
+                    return { user: membership.user, role: data.role }
+                  return membership
+                }) || [],
+            }
+          }
+        )
+      },
+    }
+  )
 
   return (
     <>
@@ -50,12 +81,17 @@ const RoleMenu = () => {
         onClick={handleClick}
         endIcon={<KeyboardArrowDownIcon />}
       >
-        Hellloo
+        {role}
       </Button>
       <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>
         {menuOptions.map((roleOption) => (
-          <MenuItem>
-            <ListItemText>{roleOption}</ListItemText>
+          <MenuItem dense onClick={() => updatePermission.mutate({ userId, role: roleOption })}>
+            {roleOption === role && (
+              <ListItemIcon>
+                <Check />
+              </ListItemIcon>
+            )}
+            <ListItemText inset={roleOption !== role}>{roleOption}</ListItemText>
           </MenuItem>
         ))}
         <Divider />
@@ -69,7 +105,7 @@ const RoleMenu = () => {
 
 export default function AccessTab({ fileId }: { fileId: string }) {
   const { data } = useQuery(['filePermissions', fileId], async () => {
-    const { data } = await axios.get<unknown, AxiosResponse<FilePermissions>>(
+    const { data } = await axios.get<unknown, AxiosResponse<{ memberships: Membership[] }>>(
       `/api/file/${fileId}/permissions`
     )
     return data
@@ -77,7 +113,7 @@ export default function AccessTab({ fileId }: { fileId: string }) {
 
   return (
     <List dense disablePadding>
-      {data?.FileMembership.map(({ user, role }) => {
+      {data?.memberships.map(({ user, role }) => {
         return (
           <ListItem sx={{ pl: 0, pr: 0 }}>
             <ListItemAvatar>
@@ -89,7 +125,7 @@ export default function AccessTab({ fileId }: { fileId: string }) {
               primary={user.email.substring(0, user.email.indexOf('@'))}
               secondary={user.email}
             />
-            <RoleMenu />
+            <RoleMenu role={role} userId={user.id} fileId={fileId} />
           </ListItem>
         )
       })}
