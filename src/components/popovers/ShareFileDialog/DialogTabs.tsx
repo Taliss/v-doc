@@ -3,6 +3,7 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import * as React from 'react'
 import AccessTab from './AccessTab'
+import InvitePeopleTab from './InvitePeopleTab'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -49,7 +50,7 @@ export default function DialogTabs({ fileId }: { fileId: string }) {
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
-        Invite People
+        <InvitePeopleTab fileId={fileId} />
       </TabPanel>
       <TabPanel value={value} index={1}>
         <AccessTab fileId={fileId} />
