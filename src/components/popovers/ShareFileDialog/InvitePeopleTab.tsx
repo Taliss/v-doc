@@ -45,7 +45,7 @@ export default function InvitePeopleTab({ fileId }: { fileId: string }) {
         renderInput={(params) => (
           <TextField
             {...params}
-            label="Asynchronous"
+            label="Add people"
             InputProps={{
               ...params.InputProps,
               endAdornment: (
