@@ -17,7 +17,11 @@ const removeFilePermissionSchema = object({
 const resolveFileWithPermissions = async (fileId: string, sessionUserId: string) => {
   const file = await prisma.file.findUnique({
     where: { id: fileId },
-    select: { authorId: true, name: true, FileMembership: true },
+    select: {
+      authorId: true,
+      name: true,
+      FileMembership: { select: { userId: true, role: true } },
+    },
   })
 
   if (file?.authorId !== sessionUserId) return null
