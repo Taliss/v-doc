@@ -5,6 +5,7 @@ import useConfirm from 'hooks/useConfirm'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useMemo } from 'react'
 import routes from 'routes'
 import CreateFileDialog from './popovers/CreateFileDialog'
 
@@ -46,9 +47,46 @@ const StyledLink = styled(Link)(({ theme }) => ({
   },
 }))
 
-export default function Navbar() {
+const publicLinks = [
+  {
+    label: 'Public',
+    href: routes.public,
+  },
+]
+const protectedLinks = [
+  {
+    label: 'Personal',
+    href: routes.personal,
+  },
+  {
+    label: 'Shared',
+    href: routes.shared,
+  },
+]
+const Links = () => {
   const { status } = useSession()
   const router = useRouter()
+  const links = useMemo(() => {
+    return status === 'authenticated' ? [...publicLinks, ...protectedLinks] : publicLinks
+  }, [status])
+
+  return (
+    <Stack direction={{ xs: 'column', sm: 'row' }} pt={{ xs: 2, sm: 0 }} spacing={{ xs: 1, sm: 4 }}>
+      {links.map((link) => (
+        <StyledLink
+          key={link.label}
+          href={link.href}
+          className={router.pathname === `${link.href}` ? 'active' : ''}
+        >
+          {link.label}
+        </StyledLink>
+      ))}
+    </Stack>
+  )
+}
+
+export default function Navbar() {
+  const { status } = useSession()
   const createFile = useConfirm({ disableBackdropClose: true })
 
   return (
@@ -63,26 +101,7 @@ export default function Navbar() {
       }}
     >
       <Stack direction="row" justifyContent="space-between" flexGrow={1}>
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          pt={{ xs: 2, sm: 0 }}
-          spacing={{ xs: 1, sm: 4 }}
-        >
-          <StyledLink
-            href={routes.public}
-            className={router.pathname === `${routes.public}` ? 'active' : ''}
-          >
-            Public
-          </StyledLink>
-          {status === 'authenticated' && (
-            <StyledLink
-              href={routes.personal}
-              className={router.pathname === `${routes.personal}` ? 'active' : ''}
-            >
-              Personal
-            </StyledLink>
-          )}
-        </Stack>
+        <Links />
         {status === 'authenticated' && (
           <>
             <Tooltip title="New File">
