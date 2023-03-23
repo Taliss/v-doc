@@ -1,7 +1,9 @@
 import prisma from '@/prisma-client'
+import { File } from '@prisma/client'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ParsedUrlQuery } from 'querystring'
 
+export type PublicFileWithOwner = File & { owner: {id: string, email: string}}
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     const { id } = req.query as ParsedUrlQuery & { id: string }

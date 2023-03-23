@@ -1,13 +1,13 @@
 import { LexicalEditor } from '@/components/editor/LexicalEditor'
 import FileLayout from '@/layouts/FileLayout'
 import MainLayout from '@/layouts/MainLayout'
-import prisma from '@/prisma-client'
-import { Box, Divider, Paper } from '@mui/material'
+import { Box, Divider, LinearProgress, Paper } from '@mui/material'
 import { Prisma } from '@prisma/client'
-import { GetServerSideProps } from 'next'
-import { ParsedUrlQuery } from 'querystring'
+import axios, { AxiosResponse } from 'axios'
+import { useRouter } from 'next/router'
+import { PublicFileWithOwner } from 'pages/api/file/public/[id]'
 import { ReactNode } from 'react'
-import routes from 'routes'
+import { useQuery } from 'react-query'
 
 export type FileWithOwnerProps = {
   file: {
@@ -17,42 +17,26 @@ export type FileWithOwnerProps = {
     owner: { email: string }
   }
 }
-// TODO: use this as a public file browsing path, change later
-export const getServerSideProps: GetServerSideProps<FileWithOwnerProps> = async (ctx) => {
-  const { id } = ctx.query as ParsedUrlQuery & { id: string }
-  try {
-    const file = await prisma.file.findUnique({
-      where: {
-        id,
-      },
-      select: {
-        id: true,
-        name: true,
-        content: true,
-        owner: { select: { email: true } },
-        visibility: true,
-        authorId: true
-      },
-    })
 
-    // TODO: nextjs supports redirects as middleware, need to reed the docs...
-    if (!file || file.visibility !== 'PUBLIC') {
-      return { redirect: { destination: routes.root, permanent: false } }
-    }
+export default function PublicFile() {
 
-    return { props: { file } }
-  } catch (error) {
-    console.error(error)
-    return {
-      redirect: {
-        destination: routes.root,
-        permanent: false,
-      },
-    }
+  const {query: { id }, push} = useRouter()
+
+  const {data: file, isLoading } = useQuery(['public-file', id], async () => {
+    //TODO: stupid, but... https://github.com/vercel/next.js/discussions/11484 no time to read the thread
+    if (!id) { return }
+    const { data } = await axios.get<unknown,AxiosResponse<PublicFileWithOwner>>(`/api/file/public/${id}`)
+    return data
+  })
+
+  if (isLoading) {
+    return <LinearProgress />
   }
-}
 
-export default function PublicFile({ file }: FileWithOwnerProps) {
+  if (!file) {
+    return null
+  }
+
   return (
     <>
       <FileLayout fileName={file.name} owner={file.owner.email} />
@@ -61,7 +45,7 @@ export default function PublicFile({ file }: FileWithOwnerProps) {
           <LexicalEditor
             id={file.id}
             editable={false}
-            editorState={JSON.stringify(file.content)}
+            editorState={!!file?.content ? JSON.stringify(file.content) : null}
             editableClassName="editor-view"
           />
         </Paper>
@@ -78,3 +62,4 @@ PublicFile.getLayout = (page: ReactNode) => {
     </MainLayout>
   )
 }
+
