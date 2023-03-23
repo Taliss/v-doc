@@ -2,25 +2,15 @@ import { LexicalEditor } from '@/components/editor/LexicalEditor'
 import FileLayout from '@/layouts/FileLayout'
 import MainLayout from '@/layouts/MainLayout'
 import { Box, Divider, LinearProgress, Paper } from '@mui/material'
-import { Prisma } from '@prisma/client'
 import axios, { AxiosResponse } from 'axios'
 import { useRouter } from 'next/router'
 import { PublicFileWithOwner } from 'pages/api/file/public/[id]'
 import { ReactNode } from 'react'
 import { useQuery } from 'react-query'
 
-export type FileWithOwnerProps = {
-  file: {
-    id: string
-    name: string
-    content: Prisma.JsonValue
-    owner: { email: string }
-  }
-}
-
 export default function PublicFile() {
 
-  const {query: { id }, push} = useRouter()
+  const {query: { id }} = useRouter()
 
   const {data: file, isLoading } = useQuery(['public-file', id], async () => {
     //TODO: stupid, but... https://github.com/vercel/next.js/discussions/11484 no time to read the thread
