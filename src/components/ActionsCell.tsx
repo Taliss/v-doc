@@ -1,4 +1,5 @@
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
+import ShareIcon from '@mui/icons-material/Share'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import { AlertColor } from '@mui/material'
@@ -6,10 +7,12 @@ import IconButton from '@mui/material/IconButton'
 import TableCell from '@mui/material/TableCell'
 import Tooltip from '@mui/material/Tooltip'
 import axios from 'axios'
+import useConfirm from 'hooks/useConfirm'
 import { FileWithoutContent } from 'pages/personal'
 import { useReducer, useState } from 'react'
 import { useMutation, useQueryClient } from 'react-query'
 import AlertSnackbar from './popovers/AlertSnackbar'
+import ShareFileDialog from './popovers/ShareFileDialog'
 
 type ActionsProps = {
   type:
@@ -47,6 +50,7 @@ type UpdateVisibilityProps = {
 export default function ActionsCell({ visibility, id }: { visibility: string; id: string }) {
   const [state, dispatch] = useReducer(reducer, null)
   const [open, setOpen] = useState(false)
+  const shareFileDialog = useConfirm({ disableBackdropClose: true })
   const queryClient = useQueryClient()
 
   const Icon = visibility === 'public' ? VisibilityIcon : VisibilityOffIcon
@@ -125,6 +129,12 @@ export default function ActionsCell({ visibility, id }: { visibility: string; id
             <DeleteForeverIcon />
           </IconButton>
         </Tooltip>
+        <Tooltip title="Share" onClick={shareFileDialog.openHandler}>
+          <IconButton color="primary">
+            <ShareIcon />
+          </IconButton>
+        </Tooltip>
+        {shareFileDialog.open && <ShareFileDialog {...shareFileDialog} fileId={id} />}
       </TableCell>
       {open && (
         <AlertSnackbar
