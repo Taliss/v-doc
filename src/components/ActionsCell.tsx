@@ -6,7 +6,9 @@ import IconButton from '@mui/material/IconButton'
 import TableCell from '@mui/material/TableCell'
 import Tooltip from '@mui/material/Tooltip'
 import axios from 'axios'
+import { FileWithoutContent } from 'pages/personal'
 import { useCallback, useReducer, useState } from 'react'
+import { useMutation, useQueryClient } from 'react-query'
 import AlertSnackbar from './popovers/AlertSnackbar'
 
 type ActionsProps = {
@@ -30,23 +32,23 @@ const reducer = (state: ActionsState, action: ActionsProps) => {
     return { message: 'File visibility changed', status: success }
   if (action.type === 'update_visibility_failure')
     return { message: clientSideToastFailureMessage, status: failure }
-  if (action.type === 'delete_file_success')
-    return {
-      message: 'File deleted',
-      status: success,
-    }
+  if (action.type === 'delete_file_success') return { message: 'File deleted', status: success }
   if (action.type === 'delete_file_failure')
-    return {
-      message: clientSideToastFailureMessage,
-      status: failure,
-    }
+    return { message: clientSideToastFailureMessage, status: failure }
 
   return state
+}
+
+type UpdateVisibilityProps = {
+  fileId: string
+  visibility: 'public' | 'private'
 }
 
 export default function ActionsCell({ visibility, id }: { visibility: string; id: string }) {
   const [state, dispatch] = useReducer(reducer, null)
   const [open, setOpen] = useState(false)
+  const queryClient = useQueryClient()
+
   const Icon = visibility === 'public' ? VisibilityIcon : VisibilityOffIcon
   const title = visibility === 'public' ? 'Switch file to private' : 'Switch file to public'
 
@@ -69,20 +71,32 @@ export default function ActionsCell({ visibility, id }: { visibility: string; id
     }
   }, [id])
 
-  const updateAction = useCallback(async () => {
-    try {
-      await axios.patch<{ fileId: string; visibility: 'public' | 'private' }>('/api/file/private', {
+  const updateFileVisibility = useMutation(
+    () =>
+      axios.patch<UpdateVisibilityProps>('/api/file/private', {
         fileId: id,
         visibility: visibility === 'private' ? 'public' : 'private',
-      })
-      dispatch({ type: 'update_visibility_success' })
-    } catch (error) {
-      dispatch({ type: 'update_visibility_failure' })
-      console.error(error)
-    } finally {
-      setOpen(true)
+      }),
+    {
+      onSuccess: () => {
+        queryClient.setQueryData<FileWithoutContent[]>(
+          ['private-files'],
+          (oldData) =>
+            oldData?.map(({ visibility, ...rest }) =>
+              rest.id === id
+                ? { ...rest, visibility: visibility === 'private' ? 'public' : 'private' }
+                : { ...rest, visibility }
+            ) || []
+        )
+        setOpen(true)
+        dispatch({ type: 'update_visibility_success' })
+      },
+      onError: () => {
+        setOpen(true)
+        dispatch({ type: 'update_visibility_failure' })
+      },
     }
-  }, [id, visibility])
+  )
 
   return (
     <>
@@ -93,7 +107,7 @@ export default function ActionsCell({ visibility, id }: { visibility: string; id
         }}
       >
         <Tooltip title={title}>
-          <IconButton color="secondary" onClick={() => updateAction()}>
+          <IconButton color="secondary" onClick={() => updateFileVisibility.mutate()}>
             <Icon />
           </IconButton>
         </Tooltip>
