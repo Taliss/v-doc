@@ -62,17 +62,18 @@ export default function ActionsCell({ visibility, id }: { visibility: string; id
   const deleteFile = useMutation(
     () => axios.delete<{ fileId: string }>('/api/file/private', { data: { fileId: id } }),
     {
-      onSuccess: () => {
+      onSuccess() {
         queryClient.setQueryData<FileWithoutContent[]>(
           ['private-files'],
           (oldData) => oldData?.filter((file) => file.id !== id) || []
         )
-        setOpen(true)
         dispatch({ type: 'delete_file_success' })
       },
-      onError: () => {
-        setOpen(true)
+      onError() {
         dispatch({ type: 'delete_file_failure' })
+      },
+      onSettled() {
+        setOpen(true)
       },
     }
   )
@@ -84,22 +85,23 @@ export default function ActionsCell({ visibility, id }: { visibility: string; id
         visibility: visibility === 'private' ? 'public' : 'private',
       }),
     {
-      onSuccess: () => {
+      onSuccess() {
         queryClient.setQueryData<FileWithoutContent[]>(
           ['private-files'],
           (oldData) =>
             oldData?.map(({ visibility, ...rest }) =>
               rest.id === id
-                ? { ...rest, visibility: visibility === 'private' ? 'public' : 'private' }
+                ? { ...rest, visibility: visibility === 'PRIVATE' ? 'PUBLIC' : 'PRIVATE' }
                 : { ...rest, visibility }
             ) || []
         )
-        setOpen(true)
         dispatch({ type: 'update_visibility_success' })
       },
-      onError: () => {
-        setOpen(true)
+      onError() {
         dispatch({ type: 'update_visibility_failure' })
+      },
+      onSettled() {
+        setOpen(true)
       },
     }
   )
@@ -123,6 +125,8 @@ export default function ActionsCell({ visibility, id }: { visibility: string; id
             <DeleteForeverIcon />
           </IconButton>
         </Tooltip>
+        {visibility}
+        {id}
       </TableCell>
       {open && (
         <AlertSnackbar

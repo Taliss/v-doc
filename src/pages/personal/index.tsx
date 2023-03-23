@@ -1,5 +1,6 @@
 import FilesTable from '@/components/FIlesTable'
 import { getLayout } from '@/layouts/MainLayout'
+import { FileVisibility } from '@prisma/client'
 import axios, { AxiosResponse } from 'axios'
 import { getServerSession } from 'next-auth'
 import { GetServerSideProps } from 'next/types'
@@ -18,7 +19,7 @@ export type FileWithoutContent = {
   name: string
   createdAt: string
   updatedAt: string
-  visibility: string
+  visibility: FileVisibility
   owner: {
     email: string
   }
