@@ -11,7 +11,7 @@ import { useEditor } from 'hooks/useEditor'
 import { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import { useState } from 'react'
 import { FormProvider, useForm, UseFormProps } from 'react-hook-form'
-import { useMutation } from 'react-query'
+import { useMutation, useQueryClient } from 'react-query'
 import { object, string } from 'yup'
 import ControlTextField from '../auth/ControlTextField'
 import { LexicalEditor } from '../editor/LexicalEditor'
@@ -45,6 +45,7 @@ const createEditorId = 'NEW'
 export default function CreateFileDialog({ open, closeHandler }: UseConfirmProps) {
   const createEditor = useEditor(createEditorId)
   const methods = useForm<FormData>(formOptions)
+  const queryClient = useQueryClient()
   const { setError } = methods
   const [visibility, setVisibility] = useState<'private' | 'public'>('private')
 
@@ -60,7 +61,12 @@ export default function CreateFileDialog({ open, closeHandler }: UseConfirmProps
         visibility,
       },
       {
-        onSuccess: () => closeHandler(),
+        onSuccess: () => {
+          closeHandler()
+          queryClient.invalidateQueries({
+            queryKey: [visibility === 'private' ? 'private-files' : 'public-files'],
+          })
+        },
         onError: (error) => {
           if (error instanceof AxiosError && error.code === AxiosError.ERR_BAD_REQUEST) {
             setError('fileName', { message: error.response?.data?.message })

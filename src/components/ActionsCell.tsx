@@ -125,8 +125,6 @@ export default function ActionsCell({ visibility, id }: { visibility: string; id
             <DeleteForeverIcon />
           </IconButton>
         </Tooltip>
-        {visibility}
-        {id}
       </TableCell>
       {open && (
         <AlertSnackbar
