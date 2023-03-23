@@ -3,18 +3,20 @@ import FileLayout from '@/layouts/FileLayout'
 import MainLayout from '@/layouts/MainLayout'
 import { Box, Divider, LinearProgress, Paper } from '@mui/material'
 import axios, { AxiosResponse } from 'axios'
-import { useRouter } from 'next/router'
+import { GetServerSideProps } from 'next/types'
 import { PublicFileWithOwner } from 'pages/api/file/public/[id]'
+import { ParsedUrlQuery } from 'querystring'
 import { ReactNode } from 'react'
 import { useQuery } from 'react-query'
 
-export default function PublicFile() {
+export const getServerSideProps: GetServerSideProps<{ id: string }> = async (ctx) => {
+  const { id } = ctx.query as ParsedUrlQuery & { id: string }
+  return { props: { id } }
+}
 
-  const {query: { id }} = useRouter()
+export default function PublicFile({id}: {id:string}) {
 
   const {data: file, isLoading } = useQuery(['public-file', id], async () => {
-    //TODO: stupid, but... https://github.com/vercel/next.js/discussions/11484 no time to read the thread
-    if (!id) { return }
     const { data } = await axios.get<unknown,AxiosResponse<PublicFileWithOwner>>(`/api/file/public/${id}`)
     return data
   })
