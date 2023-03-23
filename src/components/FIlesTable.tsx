@@ -60,7 +60,7 @@ export default function FilesTable({ rows, tableVisibility = 'private' }: FilesT
             <StyledTableRow
               hover
               key={row.id}
-              onClick={() => router.push(`/${resolvePath(tableVisibility)}/${row.id}`)}
+              onClick={() => router.push(`${resolvePath(tableVisibility)}/${row.id}`)}
             >
               <TableCell component="th" scope="row">
                 <Box
