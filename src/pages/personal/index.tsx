@@ -13,7 +13,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   return { props: { session } }
 }
 
-export type PrivateFile = {
+export type FileWithoutContent = {
   id: string
   name: string
   createdAt: string
@@ -25,11 +25,13 @@ export type PrivateFile = {
 }
 
 export default function Personal() {
-  const [files, setFiles] = useState<PrivateFile[] | null>(null)
+  const [files, setFiles] = useState<FileWithoutContent[] | null>(null)
   // useQuery is needed, no refreshing after insert/delete/update actions now
   useEffect(() => {
     ;(async () => {
-      const { data } = await axios.get<unknown, AxiosResponse<PrivateFile[]>>('/api/file/private')
+      const { data } = await axios.get<unknown, AxiosResponse<FileWithoutContent[]>>(
+        '/api/file/private'
+      )
       setFiles(data)
     })()
     return () => {}

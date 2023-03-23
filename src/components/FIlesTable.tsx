@@ -10,10 +10,10 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Typography from '@mui/material/Typography'
 import router from 'next/router'
-import { PrivateFile } from 'pages/personal'
+import { FileWithoutContent } from 'pages/personal'
 import ActionsCell from './ActionsCell'
 type FilesTableProps = {
-  rows: PrivateFile[]
+  rows: FileWithoutContent[]
   tableVisibility?: 'private' | 'public'
 }
 
