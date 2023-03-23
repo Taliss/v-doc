@@ -7,7 +7,7 @@ import TableCell from '@mui/material/TableCell'
 import Tooltip from '@mui/material/Tooltip'
 import axios from 'axios'
 import { FileWithoutContent } from 'pages/personal'
-import { useCallback, useReducer, useState } from 'react'
+import { useReducer, useState } from 'react'
 import { useMutation, useQueryClient } from 'react-query'
 import AlertSnackbar from './popovers/AlertSnackbar'
 
@@ -59,17 +59,23 @@ export default function ActionsCell({ visibility, id }: { visibility: string; id
     setOpen(false)
   }
 
-  const deleteAction = useCallback(async () => {
-    try {
-      await axios.delete<{ filedId: string }>('/api/file/private', { data: { fileId: id } })
-      dispatch({ type: 'delete_file_success' })
-    } catch (error) {
-      dispatch({ type: 'delete_file_failure' })
-      console.error(error)
-    } finally {
-      setOpen(true)
+  const deleteFile = useMutation(
+    () => axios.delete<{ fileId: string }>('/api/file/private', { data: { fileId: id } }),
+    {
+      onSuccess: () => {
+        queryClient.setQueryData<FileWithoutContent[]>(
+          ['private-files'],
+          (oldData) => oldData?.filter((file) => file.id !== id) || []
+        )
+        setOpen(true)
+        dispatch({ type: 'delete_file_success' })
+      },
+      onError: () => {
+        setOpen(true)
+        dispatch({ type: 'delete_file_failure' })
+      },
     }
-  }, [id])
+  )
 
   const updateFileVisibility = useMutation(
     () =>
@@ -113,7 +119,7 @@ export default function ActionsCell({ visibility, id }: { visibility: string; id
         </Tooltip>
 
         <Tooltip title="Delete">
-          <IconButton color="warning" onClick={() => deleteAction()}>
+          <IconButton color="warning" onClick={() => deleteFile.mutate()}>
             <DeleteForeverIcon />
           </IconButton>
         </Tooltip>
