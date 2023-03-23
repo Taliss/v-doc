@@ -6,13 +6,11 @@ import { FileMembership } from '@prisma/client'
 import axios, { AxiosResponse } from 'axios'
 import { GetServerSideProps } from 'next'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/router'
 import { ServerSession } from 'pages/api/auth/[...nextauth]'
 import { PublicFileWithOwner } from 'pages/api/file/public/[id]'
 import { ParsedUrlQuery } from 'querystring'
 import { ReactNode } from 'react'
 import { useQuery } from 'react-query'
-import routes from 'routes'
 
 export type PrivateFile = PublicFileWithOwner & { FileMembership: FileMembership[] }
 export const getServerSideProps: GetServerSideProps<{ id: string }> = async (ctx) => {
@@ -22,7 +20,6 @@ export const getServerSideProps: GetServerSideProps<{ id: string }> = async (ctx
 
 export default function PrivateFile({ id }: { id: string }) {
   const { data } = useSession()
-  const router = useRouter()
   const { data: file, isLoading } = useQuery(['protected-file', id], async () => {
     const { data } = await axios.get<unknown, AxiosResponse<PrivateFile>>(`/api/file/${id}`)
     return data
@@ -37,17 +34,13 @@ export default function PrivateFile({ id }: { id: string }) {
   }
 
   const session = data as ServerSession
-  if (file.owner.id !== session?.user?.id) {
-    router.push(`${routes.shared}/${file.id}`)
-    return null
-  }
-
   return (
     <>
       <FileLayout fileName={file.name} owner={file.owner.email} fileId={file.id} />
       <Box pt={1}>
         <Paper square variant="outlined" sx={{ height: '75vh' }}>
           <LexicalEditor
+            editable={file.owner.id === session?.user.id}
             id={file.id}
             editorState={!!file?.content ? JSON.stringify(file.content) : null}
             editableClassName="editor-view"
