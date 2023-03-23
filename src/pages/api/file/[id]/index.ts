@@ -16,6 +16,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: 'Provide file id' })
     }
 
+    if (req.method === 'GET') {
+      // TODO: maybe check if this can be done in the db
+      const file = await prisma.file.findUnique({
+        where: {
+          id: id as string,
+        },
+        include: {
+          owner: { select: { id: true, email: true } },
+          FileMembership: true,
+        },
+      })
+
+      if (!file) {
+        return res.status(404).end()
+      } else if (file.authorId === session.user.id) {
+        return res.json(file)
+      } else {
+        const isSharedWithUser = file.FileMembership.some(
+          ({ userId }) => userId === session.user.id
+        )
+        if (isSharedWithUser) return res.json(file)
+
+        return res.status(404).end()
+      }
+    }
+
     if (req.method === 'DELETE') {
       const fileMatchQuery = { where: { id: id as string } }
       const file = await prisma.file.findUnique(fileMatchQuery)
