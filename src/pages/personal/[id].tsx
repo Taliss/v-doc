@@ -1,65 +1,47 @@
 import { LexicalEditor } from '@/components/editor/LexicalEditor'
 import FileLayout from '@/layouts/FileLayout'
 import MainLayout from '@/layouts/MainLayout'
-import prisma from '@/prisma-client'
-import { Box, Divider, Paper } from '@mui/material'
-import { FileVisibility, Prisma } from '@prisma/client'
+import { Box, Divider, LinearProgress, Paper } from '@mui/material'
+import { FileMembership } from '@prisma/client'
+import axios, { AxiosResponse } from 'axios'
 import { GetServerSideProps } from 'next'
-import { AuthOptions, getServerSession } from 'next-auth'
-import { authOptions, ServerSession } from 'pages/api/auth/[...nextauth]'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import { ServerSession } from 'pages/api/auth/[...nextauth]'
+import { PublicFileWithOwner } from 'pages/api/file/public/[id]'
 import { ParsedUrlQuery } from 'querystring'
 import { ReactNode } from 'react'
+import { useQuery } from 'react-query'
 import routes from 'routes'
 
-export type FileWithOwnerProps = {
-  file: {
-    id: string
-    name: string
-    content: Prisma.JsonValue
-    owner: { email: string }
-    visibility: FileVisibility
-    authorId: string
-  }
-}
-// TODO: use this as a public file browsing path, change later
-export const getServerSideProps: GetServerSideProps<FileWithOwnerProps> = async (ctx) => {
+export type PrivateFile = PublicFileWithOwner & { FileMembership: FileMembership[] }
+export const getServerSideProps: GetServerSideProps<{ id: string }> = async (ctx) => {
   const { id } = ctx.query as ParsedUrlQuery & { id: string }
-
-  const session = await getServerSession<AuthOptions, ServerSession>(ctx.req, ctx.res, authOptions)
-
-  try {
-    const file = await prisma.file.findUnique({
-      where: {
-        id,
-      },
-      select: {
-        id: true,
-        name: true,
-        content: true,
-        owner: { select: { email: true } },
-        visibility: true,
-        authorId: true,
-      },
-    })
-
-    // TODO: nextjs supports redirects as middleware, need to reed the docs...
-    if (!file || file.authorId !== session?.user.id) {
-      return { redirect: { destination: routes.root, permanent: false } }
-    }
-
-    return { props: { file } }
-  } catch (error) {
-    console.error(error)
-    return {
-      redirect: {
-        destination: routes.root,
-        permanent: false,
-      },
-    }
-  }
+  return { props: { id } }
 }
 
-export default function PrivateFile({ file }: FileWithOwnerProps) {
+export default function PrivateFile({ id }: { id: string }) {
+  const { data } = useSession()
+  const router = useRouter()
+  const { data: file, isLoading } = useQuery(['protected-file', id], async () => {
+    const { data } = await axios.get<unknown, AxiosResponse<PrivateFile>>(`/api/file/${id}`)
+    return data
+  })
+
+  if (isLoading) {
+    return <LinearProgress />
+  }
+
+  if (!file) {
+    return null
+  }
+
+  const session = data as ServerSession
+  if (file.owner.id !== session?.user?.id) {
+    router.push(`${routes.shared}/${file.id}`)
+    return null
+  }
+
   return (
     <>
       <FileLayout fileName={file.name} owner={file.owner.email} fileId={file.id} />
@@ -67,7 +49,7 @@ export default function PrivateFile({ file }: FileWithOwnerProps) {
         <Paper square variant="outlined" sx={{ height: '75vh' }}>
           <LexicalEditor
             id={file.id}
-            editorState={JSON.stringify(file.content)}
+            editorState={!!file?.content ? JSON.stringify(file.content) : null}
             editableClassName="editor-view"
           />
         </Paper>
