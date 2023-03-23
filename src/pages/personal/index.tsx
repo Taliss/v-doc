@@ -3,7 +3,7 @@ import { getLayout } from '@/layouts/MainLayout'
 import axios, { AxiosResponse } from 'axios'
 import { getServerSession } from 'next-auth'
 import { GetServerSideProps } from 'next/types'
-import { useEffect, useState } from 'react'
+import { useQuery } from 'react-query'
 import { authOptions } from '../api/auth/[...nextauth]'
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -25,23 +25,14 @@ export type FileWithoutContent = {
 }
 
 export default function Personal() {
-  const [files, setFiles] = useState<FileWithoutContent[] | null>(null)
-  // useQuery is needed, no refreshing after insert/delete/update actions now
-  useEffect(() => {
-    ;(async () => {
-      const { data } = await axios.get<unknown, AxiosResponse<FileWithoutContent[]>>(
-        '/api/file/private'
-      )
-      setFiles(data)
-    })()
-    return () => {}
-  }, [])
+  const { data: files } = useQuery('private-files', async () => {
+    const { data } = await axios.get<unknown, AxiosResponse<FileWithoutContent[]>>(
+      '/api/file/private'
+    )
+    return data
+  })
 
-  if (!files) {
-    return <p>Loading...</p>
-  }
-
-  return <FilesTable rows={files}></FilesTable>
+  return <FilesTable rows={files || []}></FilesTable>
 }
 
 Personal.getLayout = getLayout
