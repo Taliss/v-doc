@@ -50,7 +50,7 @@ export default function CreateFileDialog({ open, closeHandler }: UseConfirmProps
   const [visibility, setVisibility] = useState<'private' | 'public'>('private')
 
   const createFile = useMutation((data: RequestFileInput) => {
-    return axios.post<RequestFileInput, unknown>(`/api/file/private`, data)
+    return axios.post<RequestFileInput, unknown>(`/api/file`, data)
   })
 
   const onSubmit = async (formData: FormData) => {

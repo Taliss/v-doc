@@ -1,17 +1,9 @@
 import prisma from '@/prisma-client'
-import { FileVisibility, Prisma } from '@prisma/client'
-import http from 'http'
+import { FileVisibility } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import { NextApiRequest, NextApiResponse } from 'next/types'
 import { object, string, ValidationError } from 'yup'
 import { authOptions, ServerSession } from '../auth/[...nextauth]'
-
-const createFileSchema = object({
-  name: string().required().trim().min(1),
-  // TODO add validation for content
-  content: object().optional(),
-  visibility: string().oneOf(['private', 'public']).optional(),
-})
 
 const updateVisibilitySchema = object({
   fileId: string().required(),
@@ -20,26 +12,6 @@ const updateVisibilitySchema = object({
 }).test('at-least-one-property', 'Provide visibility or content field', (value) => {
   return !!(value.visibility || value.content)
 })
-
-// TODO: PIPES - MIDDLEWARES - COMPOSE ?!?!?
-// TODO: how to make requests body type safe, need to research it
-const createFile = async ({
-  name,
-  content,
-  visibility,
-  authorId,
-}: Prisma.FileUncheckedCreateInput) => {
-  const file = await prisma.file.create({
-    data: {
-      name,
-      content,
-      visibility,
-      authorId,
-    },
-  })
-
-  return file
-}
 
 // TODO isn't there better way with middlewares... I know nextjs has middleware functionalities and need to reserch it, no time...
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -74,29 +46,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } catch (error) {
       console.error(error)
       return res.status(500).end()
-    }
-  }
-
-  if (req.method === 'POST') {
-    //TODO Validation, middlewares should be avaiable, but haven't used them in nextjs
-    try {
-      await createFileSchema.validate(req.body)
-      const file = await createFile({
-        name: req.body.name,
-        visibility: req.body.visibility.toUpperCase(),
-        content: req.body.content,
-        authorId: session.user.id,
-      })
-      return res.status(200).json(file)
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        return res.status(400).json({ message: 'File already exists' })
-      }
-
-      if (error instanceof ValidationError) {
-        return res.status(400).json({ message: error.message })
-      }
-      return res.status(500).json({ message: http.STATUS_CODES[500] })
     }
   }
 
