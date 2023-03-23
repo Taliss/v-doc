@@ -20,8 +20,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).end()
   }
 
-  // TODO isn't there better way to handle http methid-to-route mapping?
-  // To put it in another way - better ways provided by nextjs, without external modules (next-connect or smth)
   if (req.method === 'GET') {
     // no cursor based pagination for this example...
     try {
@@ -75,33 +73,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ message: error.message })
       }
       return res.status(500).end()
-    }
-  }
-
-  if (req.method === 'DELETE') {
-    // TODO: Not sure if Prisma supports RLS so we stick with extra query
-    if (!req?.body.fileId) {
-      return res.status(400).end()
-    }
-
-    // this try-catch is bad, error-handling middleware is required, no time to research it
-    try {
-      const fileMatchQuery = { where: { id: req.body.fileId } }
-      const file = await prisma.file.findUnique(fileMatchQuery)
-
-      if (!file) return res.status(404).end()
-      if (file.authorId !== session.user.id) {
-        return res.status(400).end()
-      }
-
-      // actually delete the file, no time for archived
-      await prisma.file.delete(fileMatchQuery)
-
-      return res.status(200).end()
-    } catch (error) {
-      // not throwing is bad as it deafens the error, but we will do it :)
-      console.error(error)
-      res.status(500).end()
     }
   }
 

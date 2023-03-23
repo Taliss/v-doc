@@ -63,24 +63,21 @@ export default function ActionsCell({ visibility, id }: { visibility: string; id
     setOpen(false)
   }
 
-  const deleteFile = useMutation(
-    () => axios.delete<{ fileId: string }>('/api/file/private', { data: { fileId: id } }),
-    {
-      onSuccess() {
-        queryClient.setQueryData<FileWithoutContent[]>(
-          ['private-files'],
-          (oldData) => oldData?.filter((file) => file.id !== id) || []
-        )
-        dispatch({ type: 'delete_file_success' })
-      },
-      onError() {
-        dispatch({ type: 'delete_file_failure' })
-      },
-      onSettled() {
-        setOpen(true)
-      },
-    }
-  )
+  const deleteFile = useMutation(() => axios.delete(`/api/file/${id}`), {
+    onSuccess() {
+      queryClient.setQueryData<FileWithoutContent[]>(
+        ['private-files'],
+        (oldData) => oldData?.filter((file) => file.id !== id) || []
+      )
+      dispatch({ type: 'delete_file_success' })
+    },
+    onError() {
+      dispatch({ type: 'delete_file_failure' })
+    },
+    onSettled() {
+      setOpen(true)
+    },
+  })
 
   const updateFileVisibility = useMutation(
     () =>

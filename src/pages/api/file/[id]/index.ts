@@ -1,31 +1,37 @@
 import prisma from '@/prisma-client'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { AuthOptions, getServerSession } from 'next-auth'
+import { authOptions, ServerSession } from 'pages/api/auth/[...nextauth]'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
+  try {
+    const session = await getServerSession<AuthOptions, ServerSession>(req, res, authOptions)
     const { id } = req.query
 
-    const file = await prisma.file.findUnique({
-      where: { id: id as string },
-      select: {
-        content: true,
-        id: true,
-        name: true,
-        visibility: true,
-        updatedAt: true,
-        createdAt: true,
-        owner: { select: { email: true } },
-        FileMembership: { select: { role: true, user: true } },
-      },
-    })
-
-    res.json({ file })
-
-    try {
-    } catch (error) {
-      console.error(error)
-      return res.status(500).end()
+    if (!session) {
+      return res.status(401).end()
     }
+
+    if (!id) {
+      return res.status(400).json({ message: 'Provide file id' })
+    }
+
+    if (req.method === 'DELETE') {
+      const fileMatchQuery = { where: { id: id as string } }
+      const file = await prisma.file.findUnique(fileMatchQuery)
+
+      if (!file) return res.status(404).end()
+      if (file.authorId !== session.user.id) {
+        return res.status(401).end()
+      }
+
+      // actually delete the file, no time for archived
+      await prisma.file.delete(fileMatchQuery)
+      return res.status(200).end()
+    }
+  } catch (error) {
+    console.error(error)
+    return res.status(500).end()
   }
 
   res.status(405).end()
