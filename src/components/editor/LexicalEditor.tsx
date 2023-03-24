@@ -2,7 +2,8 @@ import { InitialEditorStateType, LexicalComposer } from '@lexical/react/LexicalC
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
-import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin'
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
+
 import { MultipleEditorStorePlugin } from './MultipleEditorStorePlugin'
 
 export type LexicalEditorProps = {
@@ -28,7 +29,7 @@ export function LexicalEditor({
   }
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <PlainTextPlugin
+      <RichTextPlugin
         contentEditable={<ContentEditable className={editableClassName} />}
         placeholder={<div className="editor-placeholder"></div>}
         ErrorBoundary={LexicalErrorBoundary}
