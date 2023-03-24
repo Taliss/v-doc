@@ -9,13 +9,16 @@ import axios from 'axios'
 import useConfirm from 'hooks/useConfirm'
 import { useEditor } from 'hooks/useEditor'
 import { EditorState } from 'lexical'
-import { useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { ServerSession } from 'pages/api/auth/[...nextauth]'
+import { PublicFileWithOwner } from 'pages/api/file/public/[id]'
+import { useMemo, useState } from 'react'
 import { useMutation } from 'react-query'
 
 type FileLayoutProps = {
   fileName: string
-  owner: string
-  // use fileId as a flag to add button for saving content
+  owner: PublicFileWithOwner['owner']
+  // use fileId as a flag to render layout menu (share/save buttons)
   fileId?: string
 }
 
@@ -103,14 +106,19 @@ const LayoutMenu = ({ isOwner, fileId }: { isOwner: boolean; fileId: string }) =
 }
 
 export default function FileLayout({ fileName, owner, fileId }: FileLayoutProps) {
+  const { data } = useSession()
+  const isOwner = useMemo(() => {
+    const session = data as ServerSession | null
+    return session?.user.id === owner.id
+  }, [data, owner])
   return (
     <Stack direction="row" pt={1}>
       <TextSnippet color="primary" fontSize="large" sx={{ pt: 0.5, pr: 1 }} />
       <Stack>
         <Typography variant="subtitle2">{fileName}</Typography>
-        <Typography variant="subtitle2">{owner}</Typography>
+        <Typography variant="subtitle2">{owner.email}</Typography>
       </Stack>
-      {fileId && <LayoutMenu fileId={fileId} isOwner />}
+      {fileId && <LayoutMenu fileId={fileId} isOwner={isOwner} />}
     </Stack>
   )
 }

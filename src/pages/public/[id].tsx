@@ -31,7 +31,7 @@ export default function PublicFile({id}: {id:string}) {
 
   return (
     <>
-      <FileLayout fileName={file.name} owner={file.owner.email} />
+      <FileLayout fileName={file.name} owner={file.owner} />
       <Box pt={1}>
         <Paper square variant="outlined" sx={{ height: '75vh' }}>
           <LexicalEditor
