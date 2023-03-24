@@ -9,7 +9,8 @@ import axios from 'axios'
 import useConfirm from 'hooks/useConfirm'
 import { useEditor } from 'hooks/useEditor'
 import { EditorState } from 'lexical'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
+import { useMutation } from 'react-query'
 
 type FileLayoutProps = {
   fileName: string
@@ -33,25 +34,29 @@ const SaveButton = ({ fileId }: { fileId: string }) => {
   }
 
   const editor = useEditor(fileId)
-  const updateContentAction = useCallback(async () => {
-    try {
-      await axios.patch<{ fileId: string; content: EditorState }>('/api/file/private', {
+  const updateFileContent = useMutation(
+    () => {
+      return axios.patch<{ fileId: string; content: EditorState }>('/api/file/private', {
         fileId,
         content: editor?.getEditorState().toJSON(),
       })
-    } catch (error) {
-      console.error(error)
-      setActionStatus({ message: 'Something went wrong', status: 'error' })
-    } finally {
-      setOpen(true)
+    },
+    {
+      onError() {
+        setActionStatus({ message: 'Something went wrong', status: 'error' })
+      },
+      onSettled() {
+        setOpen(true)
+      },
     }
-  }, [editor?.getEditorState()])
+  )
+
   return (
     <>
       <Button
         size="small"
         variant="contained"
-        onClick={updateContentAction}
+        onClick={() => updateFileContent.mutate()}
         startIcon={<SaveIcon />}
       >
         SAVE
