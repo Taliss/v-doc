@@ -36,7 +36,7 @@ const SaveButton = ({ fileId }: { fileId: string }) => {
   const editor = useEditor(fileId)
   const updateFileContent = useMutation(
     () => {
-      return axios.patch<{ fileId: string; content: EditorState }>('/api/file/private', {
+      return axios.patch<{ fileId: string; content: EditorState }>(`/api/file/${fileId}`, {
         fileId,
         content: editor?.getEditorState().toJSON(),
       })

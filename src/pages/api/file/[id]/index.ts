@@ -1,7 +1,16 @@
 import prisma from '@/prisma-client'
+import { FileVisibility } from '@prisma/client'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { AuthOptions, getServerSession } from 'next-auth'
 import { authOptions, ServerSession } from 'pages/api/auth/[...nextauth]'
+import { object, string, ValidationError } from 'yup'
+
+const updateVisibilitySchema = object({
+  visibility: string().oneOf(['private', 'public']).optional(),
+  content: object().optional(),
+}).test('at-least-one-property', 'Provide visibility or content field', (value) => {
+  return !!(value.visibility || value.content)
+})
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -55,8 +64,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await prisma.file.delete(fileMatchQuery)
       return res.status(200).end()
     }
+
+    if (req.method === 'PATCH') {
+      await updateVisibilitySchema.validate(req.body)
+      const file = await prisma.file.findUnique({ where: { id: id as string } })
+
+      if (!file) {
+        return res.status(404).end()
+      }
+
+      // owner patch
+      if (file.authorId === session.user.id) {
+        const data: { visibility?: FileVisibility; content?: string } = {}
+        if (req.body?.visibility) data.visibility = req.body.visibility.toUpperCase()
+        if (req.body?.content) data.content = req.body.content
+        await prisma.file.update({
+          where: { id: id as string },
+          data,
+        })
+        return res.status(200).end()
+      }
+    }
   } catch (error) {
     console.error(error)
+    if (error instanceof ValidationError) {
+      return res.status(400).json({ message: error.message })
+    }
     return res.status(500).end()
   }
 
