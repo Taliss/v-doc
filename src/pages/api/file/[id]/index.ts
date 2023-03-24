@@ -3,6 +3,7 @@ import { FileVisibility } from '@prisma/client'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { AuthOptions, getServerSession } from 'next-auth'
 import { authOptions, ServerSession } from 'pages/api/auth/[...nextauth]'
+import { hasEditorPriviliges } from 'utils'
 import { object, string, ValidationError } from 'yup'
 
 const updateVisibilitySchema = object({
@@ -28,9 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === 'GET') {
       // TODO: maybe check if this can be done in the db
       const file = await prisma.file.findUnique({
-        where: {
-          id: id as string,
-        },
+        where: { id: id as string },
         include: {
           owner: { select: { id: true, email: true } },
           FileMembership: true,
@@ -67,14 +66,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'PATCH') {
       await updateVisibilitySchema.validate(req.body)
-      const file = await prisma.file.findUnique({ where: { id: id as string } })
+      const file = await prisma.file.findUnique({
+        where: { id: id as string },
+        include: {
+          owner: { select: { id: true, email: true } },
+          FileMembership: true,
+        },
+      })
 
       if (!file) {
         return res.status(404).end()
       }
 
       // owner patch
-      if (file.authorId === session.user.id) {
+      if (file.owner.id === session.user.id) {
         const data: { visibility?: FileVisibility; content?: string } = {}
         if (req.body?.visibility) data.visibility = req.body.visibility.toUpperCase()
         if (req.body?.content) data.content = req.body.content
@@ -83,6 +88,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           data,
         })
         return res.status(200).end()
+      }
+
+      if (hasEditorPriviliges(file, session)) {
+        if (!('content' in req.body)) {
+          return res.status(400).json({ message: 'Provide content field' })
+        }
+
+        await prisma.file.update({
+          where: { id: id as string },
+          data: { content: req.body.content },
+        })
+        return res.status(200).end()
+      } else {
+        // no permissions to edit file
+        res.status(404).end()
       }
     }
   } catch (error) {
