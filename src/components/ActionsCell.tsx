@@ -42,11 +42,6 @@ const reducer = (state: ActionsState, action: ActionsProps) => {
   return state
 }
 
-type UpdateVisibilityProps = {
-  fileId: string
-  visibility: 'public' | 'private'
-}
-
 export default function ActionsCell({ visibility, id }: { visibility: string; id: string }) {
   const [state, dispatch] = useReducer(reducer, null)
   const [open, setOpen] = useState(false)
@@ -81,8 +76,7 @@ export default function ActionsCell({ visibility, id }: { visibility: string; id
 
   const updateFileVisibility = useMutation(
     () =>
-      axios.patch<UpdateVisibilityProps>('/api/file/private', {
-        fileId: id,
+      axios.patch<{ visibility: 'public' | 'private' }>(`/api/file/${id}`, {
         visibility: visibility === 'private' ? 'public' : 'private',
       }),
     {
