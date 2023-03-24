@@ -37,7 +37,12 @@ export default function SharedFile({ id }: { id: string }) {
   const session = data as ServerSession
   return (
     <>
-      <FileLayout fileName={file.name} owner={file.owner} fileId={file.id} />
+      <FileLayout
+        fileName={file.name}
+        owner={file.owner}
+        fileId={file.id}
+        fileMembers={file.FileMembership}
+      />
       <Box pt={1}>
         <Paper square variant="outlined" sx={{ height: '75vh' }}>
           <LexicalEditor
