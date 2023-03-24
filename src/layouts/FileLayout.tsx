@@ -21,10 +21,9 @@ type FileLayoutProps = {
 
 const SaveButton = ({ fileId }: { fileId: string }) => {
   const [open, setOpen] = useState(false)
-  const [actionStatus, setActionStatus] = useState<{ message: string; status: AlertColor }>({
-    status: 'success',
-    message: 'File saved',
-  })
+  const [actionStatus, setActionStatus] = useState<{ message: string; status: AlertColor } | null>(
+    null
+  )
 
   const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
@@ -42,6 +41,9 @@ const SaveButton = ({ fileId }: { fileId: string }) => {
       })
     },
     {
+      onSuccess() {
+        setActionStatus({ message: 'File saved', status: 'success' })
+      },
       onError() {
         setActionStatus({ message: 'Something went wrong', status: 'error' })
       },
@@ -65,8 +67,8 @@ const SaveButton = ({ fileId }: { fileId: string }) => {
         <AlertSnackbar
           open={open}
           onClose={handleClose}
-          message={actionStatus.message}
-          severity={actionStatus.status}
+          message={actionStatus?.message || ''}
+          severity={actionStatus?.status}
         />
       )}
     </>
