@@ -14,7 +14,7 @@ import { useSession } from 'next-auth/react'
 import { ServerSession } from 'pages/api/auth/[...nextauth]'
 import { PublicFileWithOwner } from 'pages/api/file/public/[id]'
 import { useMemo, useState } from 'react'
-import { useMutation } from 'react-query'
+import { useMutation, useQueryClient } from 'react-query'
 
 type FileLayoutProps = {
   fileName: string
@@ -38,6 +38,7 @@ const SaveButton = ({ fileId, disabled = false }: { fileId: string; disabled?: b
     setOpen(false)
   }
 
+  const queryClient = useQueryClient()
   const editor = useEditor(fileId)
   const updateFileContent = useMutation(
     () => {
@@ -48,6 +49,9 @@ const SaveButton = ({ fileId, disabled = false }: { fileId: string; disabled?: b
     },
     {
       onSuccess() {
+        // queryClient.invalidateQueries([{ queryKey: ['protected-file', fileId] }])
+        queryClient.invalidateQueries(['public-file', fileId])
+        queryClient.invalidateQueries(['protected-file', fileId])
         setActionStatus({ message: 'File saved', status: 'success' })
       },
       onError() {
