@@ -12,28 +12,46 @@ datasource db {
 }
 
 model User {
-  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email      String @unique
-  password   String @unique
-  ownedFiles File[] @relation("OwnedFiles")
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email          String           @unique
+  password       String           @unique
+  ownedFiles     File[]           @relation("OwnedFiles")
+  FileMembership FileMembership[]
 
   @@map(name: "users")
 }
 
 model File {
-  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name       String
-  content    String         @default("")
-  owner      User           @relation("OwnedFiles", fields: [authorId], references: [id])
-  authorId   String         @db.Uuid
-  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  visibility FileVisibility @default(PRIVATE)
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  content        Json?
+  owner          User             @relation("OwnedFiles", fields: [authorId], references: [id])
+  authorId       String           @db.Uuid
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  visibility     FileVisibility   @default(PRIVATE)
+  FileMembership FileMembership[]
 
   @@unique([authorId, name], name: "fileAuthorIdentifier")
+}
+
+model FileMembership {
+  file   File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  fileId String    @db.Uuid
+  user   User      @relation(fields: [userId], references: [id])
+  userId String    @db.Uuid
+  role   FileRoles @default(VIEWER)
+
+  @@unique([fileId, userId], name: "filePermissionIdentifier")
 }
 
 enum FileVisibility {
   PUBLIC
   PRIVATE
+}
+
+enum FileRoles {
+  EDITOR
+  VIEWER
+  COMMENTER
 }

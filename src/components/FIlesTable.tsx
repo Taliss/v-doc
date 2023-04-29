@@ -1,26 +1,28 @@
 import { TextSnippet } from '@mui/icons-material'
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
-import VisibilityIcon from '@mui/icons-material/Visibility'
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import Box from '@mui/material/Box'
-import IconButton from '@mui/material/IconButton'
 import Paper from '@mui/material/Paper'
+import { styled } from '@mui/material/styles'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import axios from 'axios'
-import { PrivateFile } from 'pages/personal'
-import { useCallback } from 'react'
-
+import router from 'next/router'
+import { FileWithoutContent } from 'pages/personal'
+import routes from 'routes'
+import ActionsCell from './ActionsCell'
 type FilesTableProps = {
-  rows: PrivateFile[]
-  tableVisibility?: 'private' | 'public'
+  rows: FileWithoutContent[]
+  tableVisibility?: 'private' | 'public' | 'shared'
 }
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&.MuiTableRow-hover:hover': {
+    cursor: 'pointer',
+  },
+}))
 
 const HeaderTextCell = ({ label }: { label: string }) => (
   <TableCell>
@@ -30,45 +32,13 @@ const HeaderTextCell = ({ label }: { label: string }) => (
   </TableCell>
 )
 
-const ActionsCell = ({ visibility, id }: { visibility: string; id: string }) => {
-  const Icon = visibility === 'public' ? VisibilityIcon : VisibilityOffIcon
-  const title = visibility === 'public' ? 'Switch file to private' : 'Switch file to public'
-
-  const deleteAction = useCallback(async () => {
-    try {
-      await axios.delete<{ filedId: string }>('/api/file', { data: { fileId: id } })
-    } catch (error) {
-      console.error(error)
-    }
-  }, [id])
-
-  const updateAction = useCallback(async () => {
-    console.log(visibility, ' ?')
-    try {
-      await axios.patch<{ fileId: string; visibility: 'public' | 'private' }>('/api/file', {
-        fileId: id,
-        visibility: visibility === 'private' ? 'public' : 'private',
-      })
-    } catch (error) {
-      console.error(error)
-    }
-  }, [id, visibility])
-
-  return (
-    <TableCell>
-      <Tooltip title={title}>
-        <IconButton color="secondary" onClick={() => updateAction()}>
-          <Icon />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip title="Delete">
-        <IconButton color="warning" onClick={() => deleteAction()}>
-          <DeleteForeverIcon />
-        </IconButton>
-      </Tooltip>
-    </TableCell>
-  )
+const resolvePath = (tableVisibility: 'private' | 'public' | 'shared') => {
+  const pathMap = {
+    private: routes.personal,
+    public: routes.public,
+    shared: routes.shared,
+  }
+  return pathMap[tableVisibility]
 }
 
 export default function FilesTable({ rows, tableVisibility = 'private' }: FilesTableProps) {
@@ -87,7 +57,11 @@ export default function FilesTable({ rows, tableVisibility = 'private' }: FilesT
         </TableHead>
         <TableBody>
           {rows.map((row) => (
-            <TableRow key={row.id}>
+            <StyledTableRow
+              hover
+              key={row.id}
+              onClick={() => router.push(`${resolvePath(tableVisibility)}/${row.id}`)}
+            >
               <TableCell component="th" scope="row">
                 <Box
                   sx={{
@@ -106,7 +80,8 @@ export default function FilesTable({ rows, tableVisibility = 'private' }: FilesT
               {tableVisibility === 'private' && (
                 <ActionsCell visibility={row.visibility.toLowerCase()} id={row.id} />
               )}
-            </TableRow>
+              {tableVisibility !== 'private' && <TableCell />}
+            </StyledTableRow>
           ))}
         </TableBody>
       </Table>
